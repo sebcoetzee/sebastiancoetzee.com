@@ -3,8 +3,8 @@
 # url is the full website URL
 # baseurl is the website's URL without the hostname
 
-# If you are building a simple GitHub user page (http://username.github.io) then use these settings:
-url: "http://username.github.io"
+# If you are building a simple GitHub user page (username.github.io) then use these settings:
+url: "https://sebastiancoetzee.com"
 baseurl: ""
 
 # If you are building a GitHub project page then use these settings:
@@ -14,45 +14,34 @@ baseurl: ""
 # Of course don't forget to change the username and projectname to YOUR username and project
 
 # Name of website
-title: My website
+title: Sebastian Coetzee
 
 # Short description of your site
-description: A virtual proof that name is awesome!
+description: Software Engineer, surfer, golfer and coffee lover living in Cape Town.
 
 # --- Navigation bar options --- #
 
 # List of links in the navigation bar
 navbar-links:
+  Home: ""
   About Me: "aboutme"
-  Resources:
-    - Beautiful Jekyll: "http://deanattali.com/beautiful-jekyll/"
-    - Learn markdown: "http://www.markdowntutorial.com/"
-    - GitHub Pages: "https://pages.github.com/"
-  Author's home: "http://deanattali.com"
 
 # Image to show in the navigation bar - image must be a square (width = height)
 # Remove this parameter if you don't want an image in the navbar
-avatar: "/img/avatar-icon.png"
+avatar: "/img/avatar-icon.jpg"
 
 # --- Footer options --- #
 
 # Change all these values or delete the ones you don't want.
 # Important: you must keep the "name" parameter, everything else you can remove
 author:
-  name: Some Person
-  email: "youremail@domain.com"
-  facebook: yourname  # eg. daattali
-  github: yourname    # eg. daattali
-  twitter: yourname   # eg. daattali
-  reddit: yourname    # eg. daattali
-  google-plus: +yourname   # eg. +DeanAttali or 109424658772469020925
-  linkedin: yourname  # eg. daattali
-  xing: yourname      # eg. daattali
-  stackoverflow: yourlink  # eg. "3943160/daattali"
-  snapchat: yourname  # eg. daattali
-  instagram: yourname # eg. daattali
-  youtube: yourlink   # eg. user/daattali or channel/daattali
-  spotify: yourname   # eg. daattali
+  name: Sebastian Coetzee
+  email: "mail@sebastiancoetzee.com"
+  facebook: sebastian.coetzee  # eg. daattali
+  github: SebastianCoetzee    # eg. daattali
+  twitter: SebCoetzee   # eg. daattali
+  linkedin: in/sebastiancoetzee  # eg. "pub/dean-attali/8/946/143"
+  stackoverflow: 2694045/sebastian-coetzee  # eg. "3943160/daattali"
 
 # Select which links to show in the footer
 footer-links-active:
@@ -60,37 +49,27 @@ footer-links-active:
   facebook: true
   email: true
   twitter: true
-  google-plus: false
   github: true
-  reddit: false
-  linkedin: false
-  xing: false
-  stackoverflow: false
-  snapchat: false
-  instagram: false
-  youtube: false
-  spotify: false
-
+  linkedin: true
+  stackoverflow: true
 # Select which share links to show in posts
 share-links-active:
-  twitter: true
   facebook: true
+  twitter: true
   google: false
   linkedin: true
 
 # How to display the link to the website in the footer
 # Remove this if you don't want a link in the footer
-url-pretty: "MyWebsite.com"  # eg. "deanattali.com/beautiful-jekyll"
+url-pretty: "SebastianCoetzee.com"  # eg. "deanattali.com/beautiful-jekyll"
 
 # --- Misc --- #
+
 # Fill in your Disqus shortname (NOT the userid) if you want to support Disqus comments
 #disqus: ""
 
 # Fill in your Google Analytics ID to track your website using GA
-#google_analytics: ""
-
-# Facebook App ID
-# fb_app_id: ""
+google_analytics: "UA-28366174-2"
 
 # Excerpt Word Length
 # Truncates the excerpt to the specified number of words on the index page
@@ -99,10 +78,10 @@ excerpt_length: 50
 # --- Don't need to touch anything below here (but you can if you want) --- #
 
 # Output options (more information on Jekyll's site)
-timezone: "America/Vancouver"
+timezone: "Africa/Johannesburg"
 markdown: kramdown
 highlighter: rouge
-permalink: /:year-:month-:day-:title/
+permalink: /:year-:month-:day-:title
 paginate: 5
 
 kramdown:
@@ -136,6 +115,9 @@ exclude:
   - README.md
   - CNAME
   - Vagrantfile
+  - Capfile
+  - /config
+  - Dockerfile
 
 # prose.io config
 prose:
@@ -184,6 +166,7 @@ prose:
 
 gems:
   - jekyll-paginate
+  - jekyll-gist
 
 # Beautiful Jekyll / Dean Attali
 # 2fc73a3a967e97599c9763d05e564189
