@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+  <!-- Beautiful Jekyll | MIT license | Copyright Dean Attali 2016 -->
+  <head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>Continuous Delivery of Java Microservices</title>
+
+  <meta name="author" content="Sebastian Coetzee" />
+
+  
+
+  <link rel="alternate" type="application/rss+xml" title="Sebastian Coetzee - Software Engineer, surfer, golfer and coffee lover living in Cape Town." href="/feed.xml" />
+
+  
+    
+      <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.0/css/font-awesome.min.css" />
+    
+  
+
+  
+    
+      <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    
+      <link rel="stylesheet" href="/css/bootstrap-social.css" />
+    
+      <link rel="stylesheet" href="/css/main.css" />
+    
+  
+
+  
+    
+      <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+    
+      <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" />
+    
+  
+
+  
+
+  
+
+  
+
+    <!-- Facebook OpenGraph tags -->
+  
+
+  
+  <meta property="og:title" content="Continuous Delivery of Java Microservices" />
+  
+
+   
+  <meta property="og:description" content="A large portion of the software engineering world has moved away from large monolithic software designs. Instead of having tightly-coupled systems, the modern trend in software is to create multiple smaller, independent microservices. This allows different microservices to be responsible for different functionality in the greater system. The only thing...">
+  
+
+
+  <meta property="og:type" content="website" />
+
+  
+  <meta property="og:url" content="https://sebastiancoetzee.com/2016-03-02-continuous-deployment-of-java-microservices-using-teamcity" />
+  <link rel="canonical" href="https://sebastiancoetzee.com/2016-03-02-continuous-deployment-of-java-microservices-using-teamcity" />
+  
+
+  
+  <meta property="og:image" content="https://sebastiancoetzee.com/img/avatar-icon.jpg" />
+  
+  
+
+  <!-- Twitter summary cards -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@SebCoetzee" />
+  <meta name="twitter:creator" content="@SebCoetzee" />
+
+  
+  <meta name="twitter:title" content="Continuous Delivery of Java Microservices" />
+  
+
+  
+  <meta name="twitter:description" content="A large portion of the software engineering world has moved away from large monolithic software designs. Instead of having tightly-coupled systems, the modern trend in software is to create multiple smaller, independent microservices. This allows different microservices to be responsible for different functionality in the greater system. The only thing...">
+  
+
+  
+  <meta name="twitter:image" content="https://sebastiancoetzee.com/img/avatar-icon.jpg" />
+  
+
+</head>
+
+
+  <body>
+  
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="https://sebastiancoetzee.com">Sebastian Coetzee</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+          <li>
+            
+            
+
+
+
+
+
+<a href="/">Home</a>
+
+          </li>
+        
+        
+        
+          <li>
+            
+            
+
+
+
+
+
+<a href="/aboutme">About Me</a>
+
+          </li>
+        
+        
+      </ul>
+    </div>
+
+	
+	<div class="avatar-container">
+	  <div class="avatar-img-border">
+	    <a href="https://sebastiancoetzee.com ">
+	      <img class="avatar-img" src="/img/avatar-icon.jpg" />
+		</a>
+	  </div>
+	</div>
+	
+
+  </div>
+</nav>
+
+
+    <!-- TODO this file has become a mess, refactor it -->
+
+
+
+
+
+<header class="header-section ">
+
+<div class="intro-header no-img">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <div class="post-heading">
+          <h1>Continuous Delivery of Java Microservices</h1>
+		  
+		  
+		  
+		  <span class="post-meta">Posted on March 2, 2016</span>
+		  
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</header>
+
+
+
+
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+
+      <article role="main" class="blog-post">
+        <p>A large portion of the software engineering world has moved away from large monolithic software designs. Instead of having tightly-coupled systems, the modern trend in software is to create multiple smaller, independent microservices. This allows different microservices to be responsible for different functionality in the greater system. The only thing that a consumer of a microservice is concerned with is the interface that the microservice exposes. Typically these microservices communicate with each other via HTTP requests.</p>
+
+<p>Since microservices are typically small, decoupled units, they are perfect candidates for continuous deployment pipelines. With a continuous integration and deployment pipeline, code gets pushed straight to QA or Production when it compiles and the unit tests pass. There are several Continuous Integration tools for Java. The two most-used tools are <a href="https://www.jetbrains.com/teamcity/">TeamCity</a> and <a href="https://jenkins-ci.org/">Jenkins</a>. These tools typically check out the code from the repository when it is updated, executes the build script (Maven, Gradle, Ant etc.) and if all the tests pass and the code compiles, the build passes. In general it is beneficial to have a notification set up that notifies the relevant parties if a build fails. The earlier the team can know there is a problem with a commit, the faster it can be fixed.</p>
+
+<p>While there are many fully-featured tools for Continuous Integration, the continuous delivery part of the pipeline lacks a standard set of tools that provide the functionality we are looking for out of the box. Below you will see a flow diagram of what the pipeline should look like at a conceptual level:</p>
+
+<p><img src="../img/posts/2016-03-02-continuous-deployment-of-java-microservices/continuous_deployment_pipeline.png" alt="Conceptual Flow" style="max-width: 450px; width: 100%;" /></p>
+
+<p>In our organization I have set up notifications via a dedicated Slack channel. The notification messages typically look like this when a build passes:</p>
+
+<p><img src="../img/posts/2016-03-02-continuous-deployment-of-java-microservices/slack_build_success.jpg" alt="Slack Build Success Message" style="max-width: 100%;" /></p>
+
+<p>When the build fails, you get a horrible-looking red cross like this:</p>
+
+<p><img src="../img/posts/2016-03-02-continuous-deployment-of-java-microservices/slack_build_failure.jpg" alt="Slack Build Failure Message" style="max-width: 100%;" /></p>
+
+<p>Using these notifications, the whole team is on the pulse and everyone takes notice when builds fail.</p>
+
+<p>On the server itself, I run a deployment HTTP server written in Python with <a href="http://flask.pocoo.org/">Flask</a>. This server exposes REST endpoints that are password-protected which can be called in order to initiate the deployment of the respective microservices. Each microservice will have its own endpoint and the build type (QA or Production) is passed as an argument to the HTTP server. From TeamCity, this service is called using <code class="highlighter-rouge">curl</code> from a shell script that is configured to run when the build passes.</p>
+
+<p>TeamCity exposes the binary artifacts created during the build step via a web service. From the QA or Production servers, these artifacts can be downloaded using <code class="highlighter-rouge">wget</code> for the specified build configuration. After the artifact(s) are downloaded, the microservice is restarted on the server.</p>
+
+      </article>
+
+      
+
+      
+        <!-- Check if any share-links are active -->
+
+
+
+
+<section id = "social-share-section">
+
+  <!--- Share on Twitter -->
+  
+    <a href="https://twitter.com/intent/tweet?text=Continuous+Delivery+of+Java+Microservices+https://sebastiancoetzee.com/2016-03-02-continuous-deployment-of-java-microservices-using-teamcity"
+      class="btn btn-social-icon btn-twitter" title="Share on Twitter">
+      <span class="fa fa-fw fa-twitter" aria-hidden="true"></span>
+    </a>
+  
+
+  <!--- Share on Facebook -->
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=https://sebastiancoetzee.com/2016-03-02-continuous-deployment-of-java-microservices-using-teamcity"
+      class="btn btn-social-icon btn-facebook" title="Share on Facebook">
+      <span class="fa fa-fw fa-facebook" aria-hidden="true"></span>
+    </a>
+  
+
+  <!--- Share on Google Plus -->
+  
+
+  <!--- Share on LinkedIn -->
+  
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://sebastiancoetzee.com/2016-03-02-continuous-deployment-of-java-microservices-using-teamcity"
+      class="btn btn-social-icon btn-linkedin" title="Share on LinkedIn">
+      <span class="fa fa-fw fa-linkedin" aria-hidden="true"></span>
+    </a>
+  
+
+</section>
+
+
+
+      
+
+      <ul class="pager blog-pager">
+        
+        <li class="previous">
+          <a href="/2016-01-05-decoupled-modals-with-react-and-backbone" data-toggle="tooltip" data-placement="top" title="Decoupled modals with React and Backbone">&larr; Previous Post</a>
+        </li>
+        
+        
+        <li class="next">
+          <a href="/2016-06-12-rabbitmq-as-a-message-broker-for-ruby" data-toggle="tooltip" data-placement="top" title="RabbitMQ as a message broker for Ruby and Node.js">Next Post &rarr;</a>
+        </li>
+        
+      </ul>
+
+      
+        <div class="disqus-comments">
+          
+
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+    <footer>
+  <div class="container beautiful-jekyll-footer">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+          <li>
+            <a href="https://www.facebook.com/sebastian.coetzee" title="Facebook">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+          <li>
+            <a href="https://github.com/SebastianCoetzee" title="GitHub">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+		  
+          <li>
+            <a href="https://twitter.com/SebCoetzee" title="Twitter">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+	  
+      
+		  
+          <li>
+            <a href="mailto:mail@sebastiancoetzee.com" title="Email me">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+		  
+          <li>
+            <a href="https://linkedin.com/in/in/sebastiancoetzee" title="LinkedIn">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+		  
+		  
+          <li>
+            <a href="https://stackoverflow.com/users/2694045/sebastian-coetzee" title="StackOverflow">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+      
+      
+      
+      
+		  
+        </ul>
+        <p class="copyright text-muted">
+		  Sebastian Coetzee
+		  &nbsp;&bull;&nbsp;
+		  2016
+
+		  
+		  &nbsp;&bull;&nbsp;
+		  <a href="https://sebastiancoetzee.com">SebastianCoetzee.com</a>
+		  
+	    </p>
+	        <!-- Please don't remove this, keep my open source work credited :) -->
+		<p class="theme-by text-muted">
+		  Theme by
+		  <a href="http://deanattali.com/beautiful-jekyll/">beautiful-jekyll</a>
+		</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  
+    
+
+
+
+
+
+
+  
+    <!-- doing something a bit funky here because I want to be careful not to include JQuery twice! -->
+    
+      <script>
+      	if (typeof jQuery == 'undefined') {
+      	  document.write('<script src="/js/jquery-1.11.2.min.js"></scr' + 'ipt>');
+      	}
+      </script>
+    
+  
+    <!-- doing something a bit funky here because I want to be careful not to include JQuery twice! -->
+    
+	<script src="/js/bootstrap.min.js"></script>
+    
+  
+    <!-- doing something a bit funky here because I want to be careful not to include JQuery twice! -->
+    
+	<script src="/js/main.js"></script>
+    
+  
+
+
+
+	<!-- Google Analytics -->
+	<script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+		ga('create', 'UA-28366174-2', 'auto');
+		ga('send', 'pageview');
+	</script>
+	<!-- End Google Analytics -->
+
+
+  
+  </body>
+</html>

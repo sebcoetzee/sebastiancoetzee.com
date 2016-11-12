@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Sebastian Coetzee</title>
+    <description>Software Engineer, surfer, golfer and coffee lover living in Cape Town.</description>
+    <link>https://sebastiancoetzee.com</link>
+    <atom:link href="https://sebastiancoetzee.com/feed.xml" rel="self" type="application/rss+xml" />
+    
+      <item>
+        <title>Top 4 best WiFi coffee shops in Cape Town</title>
+        <description>
+          
+          I’m a software developer. My existence depends upon being connected to the net. I, like many other software developers, enjoy taking my laptop to the coffee shop, drinking coffee while reading up on the latest Hacker News articles or reading up on new programming languages. In order to do this,...
+        </description>
+        <pubDate>Sun, 06 Nov 2016 00:00:00 +0200</pubDate>
+        <link>https://sebastiancoetzee.com/2016-11-06-best-wifi-in-cape-town-coffee-shops</link>
+        <guid isPermaLink="true">https://sebastiancoetzee.com/2016-11-06-best-wifi-in-cape-town-coffee-shops</guid>
+      </item>
+    
+      <item>
+        <title>RabbitMQ as a message broker for Ruby and Node.js</title>
+        <description>
+          
+          ###The Backstory I am busy building a SaaS product that has to reliably send large numbers of emails. At ZappiStore we use the Ruby on Rails stack extensively. I think Rails is an excellent choice for building web applications. Rails makes you super productive and the community support is excellent....
+        </description>
+        <pubDate>Sun, 12 Jun 2016 00:00:00 +0200</pubDate>
+        <link>https://sebastiancoetzee.com/2016-06-12-rabbitmq-as-a-message-broker-for-ruby</link>
+        <guid isPermaLink="true">https://sebastiancoetzee.com/2016-06-12-rabbitmq-as-a-message-broker-for-ruby</guid>
+      </item>
+    
+      <item>
+        <title>Continuous Delivery of Java Microservices</title>
+        <description>
+          
+          A large portion of the software engineering world has moved away from large monolithic software designs. Instead of having tightly-coupled systems, the modern trend in software is to create multiple smaller, independent microservices. This allows different microservices to be responsible for different functionality in the greater system. The only thing...
+        </description>
+        <pubDate>Wed, 02 Mar 2016 00:00:00 +0200</pubDate>
+        <link>https://sebastiancoetzee.com/2016-03-02-continuous-deployment-of-java-microservices-using-teamcity</link>
+        <guid isPermaLink="true">https://sebastiancoetzee.com/2016-03-02-continuous-deployment-of-java-microservices-using-teamcity</guid>
+      </item>
+    
+      <item>
+        <title>Decoupled modals with React and Backbone</title>
+        <description>
+          
+          Currently, my preferred technology stack on the front-end is using React for the views and Backbone to give the app its structure (router, event bus, models, collections etc.). Using React gives you all the goodness of components that manage their own state and the amazing performance of the virtual DOM....
+        </description>
+        <pubDate>Tue, 05 Jan 2016 00:00:00 +0200</pubDate>
+        <link>https://sebastiancoetzee.com/2016-01-05-decoupled-modals-with-react-and-backbone</link>
+        <guid isPermaLink="true">https://sebastiancoetzee.com/2016-01-05-decoupled-modals-with-react-and-backbone</guid>
+      </item>
+    
+      <item>
+        <title>Functional Java for parallel processing</title>
+        <description>
+          
+          The modern software engineer faces a set of problems that did not exist 15 years ago. Looking at the advancement of processing power in recent years signals the end of Moore’s Law. The clock speeds of modern processors seem to be plateauing and the only way to make things go...
+        </description>
+        <pubDate>Fri, 25 Dec 2015 00:00:00 +0200</pubDate>
+        <link>https://sebastiancoetzee.com/2015-12-25-functional-java-for-parallel-processing</link>
+        <guid isPermaLink="true">https://sebastiancoetzee.com/2015-12-25-functional-java-for-parallel-processing</guid>
+      </item>
+    
+      <item>
+        <title>Welcome to the new blog!</title>
+        <description>
+          
+          So, my old blog was getting a little dated. It was a WordPress blog and with the recent craze around static sites I decided to switch over to Jekyll. The idea with this blog is for me to have a place to share things that are related to my work...
+        </description>
+        <pubDate>Sun, 13 Dec 2015 00:00:00 +0200</pubDate>
+        <link>https://sebastiancoetzee.com/2015-12-13-new-blog</link>
+        <guid isPermaLink="true">https://sebastiancoetzee.com/2015-12-13-new-blog</guid>
+      </item>
+    
+  </channel>
+</rss>
