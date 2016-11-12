@@ -250,3 +250,80 @@ af68098d52f0c7a046d3bdeeb6dcbc250026de15	refs/heads/master
   INFO [8076cefa] Running /usr/bin/env echo "Branch master (at af68098d52f0c7a046d3bdeeb6dcbc250026de15) deployed as release 20161112225320 by sebastiancoetzee" >> /root/deployments/sebastiancoetzee.com/revisions.log as root@ssh.sebastiancoetzee.com
  DEBUG [8076cefa] Command: cd /root/deployments/sebastiancoetzee.com/releases && /usr/bin/env echo "Branch master (at af68098d52f0c7a046d3bdeeb6dcbc250026de15) deployed as release 20161112225320 by sebastiancoetzee" >> /root/deployments/sebastiancoetzee.com/revisions.log
   INFO [8076cefa] Finished in 0.345 seconds with exit status 0 (successful).
+  INFO ---------------------------------------------------------------------------
+  INFO START 2016-11-13 00:54:19 +0200 cap production deploy
+  INFO ---------------------------------------------------------------------------
+  INFO [77e614ce] Running /usr/bin/env mkdir -p /tmp as root@ssh.sebastiancoetzee.com
+ DEBUG [77e614ce] Command: /usr/bin/env mkdir -p /tmp
+  INFO [77e614ce] Finished in 3.003 seconds with exit status 0 (successful).
+ DEBUG Uploading /tmp/git-ssh-sebastiancoetzee.com-production-sebastiancoetzee.sh 0.0%
+  INFO Uploading /tmp/git-ssh-sebastiancoetzee.com-production-sebastiancoetzee.sh 100.0%
+  INFO [7f0c9c22] Running /usr/bin/env chmod 700 /tmp/git-ssh-sebastiancoetzee.com-production-sebastiancoetzee.sh as root@ssh.sebastiancoetzee.com
+ DEBUG [7f0c9c22] Command: /usr/bin/env chmod 700 /tmp/git-ssh-sebastiancoetzee.com-production-sebastiancoetzee.sh
+  INFO [7f0c9c22] Finished in 0.367 seconds with exit status 0 (successful).
+  INFO [11c1b124] Running /usr/bin/env git ls-remote --heads git@github.com:SebastianCoetzee/sebastiancoetzee.com.git as root@ssh.sebastiancoetzee.com
+ DEBUG [11c1b124] Command: ( export GIT_ASKPASS="/bin/echo" GIT_SSH="/tmp/git-ssh-sebastiancoetzee.com-production-sebastiancoetzee.sh" ; /usr/bin/env git ls-remote --heads git@github.com:SebastianCoetzee/sebastiancoetzee.com.git )
+ DEBUG [11c1b124] 	973cc364c3a38446ded475bf8fb1ed344c8470ee	refs/heads/gh-pages
+9e857473bda7db9fe33eeb80eaaf7a20b5abd3e2	refs/heads/master
+  INFO [11c1b124] Finished in 2.125 seconds with exit status 0 (successful).
+  INFO [966a29d8] Running /usr/bin/env mkdir -p /root/deployments/sebastiancoetzee.com/shared /root/deployments/sebastiancoetzee.com/releases as root@ssh.sebastiancoetzee.com
+ DEBUG [966a29d8] Command: /usr/bin/env mkdir -p /root/deployments/sebastiancoetzee.com/shared /root/deployments/sebastiancoetzee.com/releases
+  INFO [966a29d8] Finished in 0.533 seconds with exit status 0 (successful).
+ DEBUG [562a1aed] Running [ -f /root/deployments/sebastiancoetzee.com/current/REVISION ] as root@ssh.sebastiancoetzee.com
+ DEBUG [562a1aed] Command: [ -f /root/deployments/sebastiancoetzee.com/current/REVISION ]
+ DEBUG [562a1aed] Finished in 0.363 seconds with exit status 0 (successful).
+ DEBUG [264af2e2] Running /usr/bin/env cat /root/deployments/sebastiancoetzee.com/current/REVISION 2>/dev/null as root@ssh.sebastiancoetzee.com
+ DEBUG [264af2e2] Command: /usr/bin/env cat /root/deployments/sebastiancoetzee.com/current/REVISION 2>/dev/null
+ DEBUG [264af2e2] 	af68098d52f0c7a046d3bdeeb6dcbc250026de15
+ DEBUG [264af2e2] Finished in 0.371 seconds with exit status 0 (successful).
+ DEBUG [10d66965] Running [ -f /root/deployments/sebastiancoetzee.com/repo/HEAD ] as root@ssh.sebastiancoetzee.com
+ DEBUG [10d66965] Command: [ -f /root/deployments/sebastiancoetzee.com/repo/HEAD ]
+ DEBUG [10d66965] Finished in 0.364 seconds with exit status 0 (successful).
+  INFO The repository mirror is at /root/deployments/sebastiancoetzee.com/repo
+ DEBUG [9d82a124] Running if test ! -d /root/deployments/sebastiancoetzee.com/repo; then echo "Directory does not exist '/root/deployments/sebastiancoetzee.com/repo'" 1>&2; false; fi as root@ssh.sebastiancoetzee.com
+ DEBUG [9d82a124] Command: if test ! -d /root/deployments/sebastiancoetzee.com/repo; then echo "Directory does not exist '/root/deployments/sebastiancoetzee.com/repo'" 1>&2; false; fi
+ DEBUG [9d82a124] Finished in 0.359 seconds with exit status 0 (successful).
+  INFO [a9472aaf] Running /usr/bin/env git remote update --prune as root@ssh.sebastiancoetzee.com
+ DEBUG [a9472aaf] Command: cd /root/deployments/sebastiancoetzee.com/repo && ( export GIT_ASKPASS="/bin/echo" GIT_SSH="/tmp/git-ssh-sebastiancoetzee.com-production-sebastiancoetzee.sh" ; /usr/bin/env git remote update --prune )
+ DEBUG [a9472aaf] 	Fetching origin
+ DEBUG [a9472aaf] 	From github.com:SebastianCoetzee/sebastiancoetzee.com
+ DEBUG [a9472aaf] 	   af68098..9e85747  master     -> master
+  INFO [a9472aaf] Finished in 2.297 seconds with exit status 0 (successful).
+ DEBUG [f360ab9d] Running if test ! -d /root/deployments/sebastiancoetzee.com/repo; then echo "Directory does not exist '/root/deployments/sebastiancoetzee.com/repo'" 1>&2; false; fi as root@ssh.sebastiancoetzee.com
+ DEBUG [f360ab9d] Command: if test ! -d /root/deployments/sebastiancoetzee.com/repo; then echo "Directory does not exist '/root/deployments/sebastiancoetzee.com/repo'" 1>&2; false; fi
+ DEBUG [f360ab9d] Finished in 0.363 seconds with exit status 0 (successful).
+  INFO [136d2a2d] Running /usr/bin/env mkdir -p /root/deployments/sebastiancoetzee.com/releases/20161112225429 as root@ssh.sebastiancoetzee.com
+ DEBUG [136d2a2d] Command: cd /root/deployments/sebastiancoetzee.com/repo && ( export GIT_ASKPASS="/bin/echo" GIT_SSH="/tmp/git-ssh-sebastiancoetzee.com-production-sebastiancoetzee.sh" ; /usr/bin/env mkdir -p /root/deployments/sebastiancoetzee.com/releases/20161112225429 )
+  INFO [136d2a2d] Finished in 0.370 seconds with exit status 0 (successful).
+  INFO [acbbb4bb] Running /usr/bin/env git archive master | tar -x -f - -C /root/deployments/sebastiancoetzee.com/releases/20161112225429 as root@ssh.sebastiancoetzee.com
+ DEBUG [acbbb4bb] Command: cd /root/deployments/sebastiancoetzee.com/repo && ( export GIT_ASKPASS="/bin/echo" GIT_SSH="/tmp/git-ssh-sebastiancoetzee.com-production-sebastiancoetzee.sh" ; /usr/bin/env git archive master | tar -x -f - -C /root/deployments/sebastiancoetzee.com/releases/20161112225429 )
+  INFO [acbbb4bb] Finished in 0.580 seconds with exit status 0 (successful).
+ DEBUG [3a0c1e74] Running if test ! -d /root/deployments/sebastiancoetzee.com/repo; then echo "Directory does not exist '/root/deployments/sebastiancoetzee.com/repo'" 1>&2; false; fi as root@ssh.sebastiancoetzee.com
+ DEBUG [3a0c1e74] Command: if test ! -d /root/deployments/sebastiancoetzee.com/repo; then echo "Directory does not exist '/root/deployments/sebastiancoetzee.com/repo'" 1>&2; false; fi
+ DEBUG [3a0c1e74] Finished in 0.358 seconds with exit status 0 (successful).
+ DEBUG [c8f0e6fc] Running /usr/bin/env git rev-list --max-count=1 master as root@ssh.sebastiancoetzee.com
+ DEBUG [c8f0e6fc] Command: cd /root/deployments/sebastiancoetzee.com/repo && ( export GIT_ASKPASS="/bin/echo" GIT_SSH="/tmp/git-ssh-sebastiancoetzee.com-production-sebastiancoetzee.sh" ; /usr/bin/env git rev-list --max-count=1 master )
+ DEBUG [c8f0e6fc] 	9e857473bda7db9fe33eeb80eaaf7a20b5abd3e2
+ DEBUG [c8f0e6fc] Finished in 0.371 seconds with exit status 0 (successful).
+ DEBUG [f0517c6a] Running if test ! -d /root/deployments/sebastiancoetzee.com/releases/20161112225429; then echo "Directory does not exist '/root/deployments/sebastiancoetzee.com/releases/20161112225429'" 1>&2; false; fi as root@ssh.sebastiancoetzee.com
+ DEBUG [f0517c6a] Command: if test ! -d /root/deployments/sebastiancoetzee.com/releases/20161112225429; then echo "Directory does not exist '/root/deployments/sebastiancoetzee.com/releases/20161112225429'" 1>&2; false; fi
+ DEBUG [f0517c6a] Finished in 0.364 seconds with exit status 0 (successful).
+  INFO [8962710d] Running /usr/bin/env echo "9e857473bda7db9fe33eeb80eaaf7a20b5abd3e2" >> REVISION as root@ssh.sebastiancoetzee.com
+ DEBUG [8962710d] Command: cd /root/deployments/sebastiancoetzee.com/releases/20161112225429 && /usr/bin/env echo "9e857473bda7db9fe33eeb80eaaf7a20b5abd3e2" >> REVISION
+  INFO [8962710d] Finished in 0.365 seconds with exit status 0 (successful).
+  INFO [7f1a5eb8] Running /usr/bin/env ln -s /root/deployments/sebastiancoetzee.com/releases/20161112225429 /root/deployments/sebastiancoetzee.com/releases/current as root@ssh.sebastiancoetzee.com
+ DEBUG [7f1a5eb8] Command: /usr/bin/env ln -s /root/deployments/sebastiancoetzee.com/releases/20161112225429 /root/deployments/sebastiancoetzee.com/releases/current
+  INFO [7f1a5eb8] Finished in 0.368 seconds with exit status 0 (successful).
+  INFO [8ab57c29] Running /usr/bin/env mv /root/deployments/sebastiancoetzee.com/releases/current /root/deployments/sebastiancoetzee.com as root@ssh.sebastiancoetzee.com
+ DEBUG [8ab57c29] Command: /usr/bin/env mv /root/deployments/sebastiancoetzee.com/releases/current /root/deployments/sebastiancoetzee.com
+  INFO [8ab57c29] Finished in 0.367 seconds with exit status 0 (successful).
+ DEBUG [1930b874] Running /usr/bin/env ls -xtr /root/deployments/sebastiancoetzee.com/releases as root@ssh.sebastiancoetzee.com
+ DEBUG [1930b874] Command: /usr/bin/env ls -xtr /root/deployments/sebastiancoetzee.com/releases
+ DEBUG [1930b874] 	20161112223434	20161112223930	20161112225320	20161112225429
+ DEBUG [1930b874] Finished in 0.361 seconds with exit status 0 (successful).
+ DEBUG [b3e90f41] Running if test ! -d /root/deployments/sebastiancoetzee.com/releases; then echo "Directory does not exist '/root/deployments/sebastiancoetzee.com/releases'" 1>&2; false; fi as root@ssh.sebastiancoetzee.com
+ DEBUG [b3e90f41] Command: if test ! -d /root/deployments/sebastiancoetzee.com/releases; then echo "Directory does not exist '/root/deployments/sebastiancoetzee.com/releases'" 1>&2; false; fi
+ DEBUG [b3e90f41] Finished in 0.362 seconds with exit status 0 (successful).
+  INFO [f479a5e7] Running /usr/bin/env echo "Branch master (at 9e857473bda7db9fe33eeb80eaaf7a20b5abd3e2) deployed as release 20161112225429 by sebastiancoetzee" >> /root/deployments/sebastiancoetzee.com/revisions.log as root@ssh.sebastiancoetzee.com
+ DEBUG [f479a5e7] Command: cd /root/deployments/sebastiancoetzee.com/releases && /usr/bin/env echo "Branch master (at 9e857473bda7db9fe33eeb80eaaf7a20b5abd3e2) deployed as release 20161112225429 by sebastiancoetzee" >> /root/deployments/sebastiancoetzee.com/revisions.log
+  INFO [f479a5e7] Finished in 0.376 seconds with exit status 0 (successful).
