@@ -3,7 +3,8 @@ layout: post
 title: RabbitMQ as a message broker for Ruby and Node.js
 ---
 
-###The Backstory
+### The Backstory
+
 I am busy building a SaaS product that has to reliably send large numbers of emails. At [ZappiStore](https://www.zappistore.com/) we use the [Ruby on Rails](http://rubyonrails.org/) stack extensively. I think Rails is an excellent choice for building web applications. Rails makes you super productive and the community support is excellent. Naturally I want to use Rails for the web application layer of the system. There are a couple of different options built into Rails for sending emails.
 
 I don't want a user to have to wait one or two seconds for an SMTP request to finish before they get a response, so sending will have to be done asynchronously. The ActionMailer API in Rails is built for sending emails but ideally I want to pass off the load of sending mails to something that is good at making large amounts of requests and handling them asynchronously. There is support for asynchronous requests in Ruby but it is not as geared towards it as JavaScript is. Also, since Ruby is single-threaded with a global interpreter lock, I want it to do as little processing as possible and rather play to its strengths.
@@ -17,7 +18,8 @@ Since the web application layer is written in Ruby and I have a microservice wri
 
 Enter [RabbitMQ](https://www.rabbitmq.com). Rabbit has been around for a long time and has proven to be a high-performance and reliable message queue. The idea is to use Ruby to push a message onto the queue and then pop the message off of the queue in the Node.js microservice.
 
-###Getting Started with RabbitMQ
+### Getting Started with RabbitMQ
+
 For those of us that use OS X, installing RabbitMQ is easiest done with [Homebrew](http://brew.sh/):
 
 ```
@@ -30,7 +32,8 @@ Once RabbitMQ is installed, start it up as a service with the following command:
 brew services start rabbitmq
 ```
 
-###The Ruby Layer
+### The Ruby Layer
+
 In order to connect to RabbitMQ from Ruby we are going to use the [bunny](https://github.com/ruby-amqp/bunny) gem. Add it to your `Gemfile`:
 
 ```
@@ -152,7 +155,8 @@ AccountActivationService.instance
 {% endhighlight %}
 
 
-###The Node Layer
+### The Node Layer
+
 The `package.json` for the project is as follows:
 
 {% highlight json %}
@@ -315,7 +319,8 @@ require('amqplib/callback_api')
   );
 {% endhighlight %}
 
-###Putting it all together
+### Putting it all together
+
 In order to send email accross the queue, the following code is executed from the Rails `UsersController`:
 
 {% highlight ruby %}
@@ -338,5 +343,6 @@ class UsersController < ApplicationController
 end
 {% endhighlight %}
 
-###Summary
+### Summary
+
 [Node.js](https://nodejs.org) provides first-class support for asynchronous execution of HTTP requests. This makes it a great technology to use for sending emails via the [Mailgun](https://www.mailgun.com/) API. [Ruby on Rails](http://rubyonrails.org/) is great for building web applications. We want to leverage the best features of these two technologies together and we implemented [RabbitMQ](https://www.rabbitmq.com) to enable robust communication between the Ruby and the JavaScript layers.

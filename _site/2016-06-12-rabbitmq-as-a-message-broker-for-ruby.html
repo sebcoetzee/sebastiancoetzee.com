@@ -52,7 +52,7 @@
   
 
    
-  <meta property="og:description" content="###The Backstory I am busy building a SaaS product that has to reliably send large numbers of emails. At ZappiStore we use the Ruby on Rails stack extensively. I think Rails is an excellent choice for building web applications. Rails makes you super productive and the community support is excellent....">
+  <meta property="og:description" content="The Backstory I am busy building a SaaS product that has to reliably send large numbers of emails. At ZappiStore we use the Ruby on Rails stack extensively. I think Rails is an excellent choice for building web applications. Rails makes you super productive and the community support is excellent....">
   
 
 
@@ -78,7 +78,7 @@
   
 
   
-  <meta name="twitter:description" content="###The Backstory I am busy building a SaaS product that has to reliably send large numbers of emails. At ZappiStore we use the Ruby on Rails stack extensively. I think Rails is an excellent choice for building web applications. Rails makes you super productive and the community support is excellent....">
+  <meta name="twitter:description" content="The Backstory I am busy building a SaaS product that has to reliably send large numbers of emails. At ZappiStore we use the Ruby on Rails stack extensively. I think Rails is an excellent choice for building web applications. Rails makes you super productive and the community support is excellent....">
   
 
   
@@ -184,8 +184,9 @@
     <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 
       <article role="main" class="blog-post">
-        <p>###The Backstory
-I am busy building a SaaS product that has to reliably send large numbers of emails. At <a href="https://www.zappistore.com/">ZappiStore</a> we use the <a href="http://rubyonrails.org/">Ruby on Rails</a> stack extensively. I think Rails is an excellent choice for building web applications. Rails makes you super productive and the community support is excellent. Naturally I want to use Rails for the web application layer of the system. There are a couple of different options built into Rails for sending emails.</p>
+        <h3 id="the-backstory">The Backstory</h3>
+
+<p>I am busy building a SaaS product that has to reliably send large numbers of emails. At <a href="https://www.zappistore.com/">ZappiStore</a> we use the <a href="http://rubyonrails.org/">Ruby on Rails</a> stack extensively. I think Rails is an excellent choice for building web applications. Rails makes you super productive and the community support is excellent. Naturally I want to use Rails for the web application layer of the system. There are a couple of different options built into Rails for sending emails.</p>
 
 <p>I don’t want a user to have to wait one or two seconds for an SMTP request to finish before they get a response, so sending will have to be done asynchronously. The ActionMailer API in Rails is built for sending emails but ideally I want to pass off the load of sending mails to something that is good at making large amounts of requests and handling them asynchronously. There is support for asynchronous requests in Ruby but it is not as geared towards it as JavaScript is. Also, since Ruby is single-threaded with a global interpreter lock, I want it to do as little processing as possible and rather play to its strengths.</p>
 
@@ -200,8 +201,9 @@ I am busy building a SaaS product that has to reliably send large numbers of ema
 
 <p>Enter <a href="https://www.rabbitmq.com">RabbitMQ</a>. Rabbit has been around for a long time and has proven to be a high-performance and reliable message queue. The idea is to use Ruby to push a message onto the queue and then pop the message off of the queue in the Node.js microservice.</p>
 
-<p>###Getting Started with RabbitMQ
-For those of us that use OS X, installing RabbitMQ is easiest done with <a href="http://brew.sh/">Homebrew</a>:</p>
+<h3 id="getting-started-with-rabbitmq">Getting Started with RabbitMQ</h3>
+
+<p>For those of us that use OS X, installing RabbitMQ is easiest done with <a href="http://brew.sh/">Homebrew</a>:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code>brew install rabbitmq
 </code></pre>
@@ -213,8 +215,9 @@ For those of us that use OS X, installing RabbitMQ is easiest done with <a href=
 </code></pre>
 </div>
 
-<p>###The Ruby Layer
-In order to connect to RabbitMQ from Ruby we are going to use the <a href="https://github.com/ruby-amqp/bunny">bunny</a> gem. Add it to your <code class="highlighter-rouge">Gemfile</code>:</p>
+<h3 id="the-ruby-layer">The Ruby Layer</h3>
+
+<p>In order to connect to RabbitMQ from Ruby we are going to use the <a href="https://github.com/ruby-amqp/bunny">bunny</a> gem. Add it to your <code class="highlighter-rouge">Gemfile</code>:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code>gem 'bunny', '~&gt; 2.3.1'
 </code></pre>
@@ -328,8 +331,9 @@ In order to connect to RabbitMQ from Ruby we are going to use the <a href="https
 <span class="c1"># Initialize the object</span>
 <span class="no">AccountActivationService</span><span class="p">.</span><span class="nf">instance</span></code></pre></figure>
 
-<p>###The Node Layer
-The <code class="highlighter-rouge">package.json</code> for the project is as follows:</p>
+<h3 id="the-node-layer">The Node Layer</h3>
+
+<p>The <code class="highlighter-rouge">package.json</code> for the project is as follows:</p>
 
 <figure class="highlight"><pre><code class="language-json" data-lang="json"><span class="p">{</span><span class="w">
   </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"email_worker"</span><span class="p">,</span><span class="w">
@@ -485,8 +489,9 @@ The <code class="highlighter-rouge">package.json</code> for the project is as fo
     <span class="p">}</span>
   <span class="p">);</span></code></pre></figure>
 
-<p>###Putting it all together
-In order to send email accross the queue, the following code is executed from the Rails <code class="highlighter-rouge">UsersController</code>:</p>
+<h3 id="putting-it-all-together">Putting it all together</h3>
+
+<p>In order to send email accross the queue, the following code is executed from the Rails <code class="highlighter-rouge">UsersController</code>:</p>
 
 <figure class="highlight"><pre><code class="language-ruby" data-lang="ruby"><span class="k">class</span> <span class="nc">UsersController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
 
@@ -506,8 +511,9 @@ In order to send email accross the queue, the following code is executed from th
 
 <span class="k">end</span></code></pre></figure>
 
-<p>###Summary
-<a href="https://nodejs.org">Node.js</a> provides first-class support for asynchronous execution of HTTP requests. This makes it a great technology to use for sending emails via the <a href="https://www.mailgun.com/">Mailgun</a> API. <a href="http://rubyonrails.org/">Ruby on Rails</a> is great for building web applications. We want to leverage the best features of these two technologies together and we implemented <a href="https://www.rabbitmq.com">RabbitMQ</a> to enable robust communication between the Ruby and the JavaScript layers.</p>
+<h3 id="summary">Summary</h3>
+
+<p><a href="https://nodejs.org">Node.js</a> provides first-class support for asynchronous execution of HTTP requests. This makes it a great technology to use for sending emails via the <a href="https://www.mailgun.com/">Mailgun</a> API. <a href="http://rubyonrails.org/">Ruby on Rails</a> is great for building web applications. We want to leverage the best features of these two technologies together and we implemented <a href="https://www.rabbitmq.com">RabbitMQ</a> to enable robust communication between the Ruby and the JavaScript layers.</p>
 
       </article>
 
