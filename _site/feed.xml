@@ -2,9 +2,20 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Sebastian Coetzee</title>
-    <description>Software Engineer, surfer, golfer and coffee lover living in Cape Town.</description>
+    <description>Software Engineer living in London.</description>
     <link>https://sebastiancoetzee.com</link>
     <atom:link href="https://sebastiancoetzee.com/feed.xml" rel="self" type="application/rss+xml" />
+    
+      <item>
+        <title>JSON Web Tokens for authentication in distributed systems</title>
+        <description>
+          
+          Starting out with a software project, authentication is usually quite a simple problem to solve. You simply create a users table in the database, collect users’ usernames and passwords (hashed and salted), and authenticate users against it. Just about every framework has a built-in way of doing authentication that can...
+        </description>
+        <pubDate>Sun, 15 Oct 2017 00:00:00 +0200</pubDate>
+        <link>https://sebastiancoetzee.com/2017-10-15-json-web-token-authentication-rails</link>
+        <guid isPermaLink="true">https://sebastiancoetzee.com/2017-10-15-json-web-token-authentication-rails</guid>
+      </item>
     
       <item>
         <title>Top 4 best WiFi coffee shops in Cape Town</title>
