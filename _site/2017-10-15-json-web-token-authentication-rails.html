@@ -276,7 +276,7 @@
 
 <p>In order for the authentication strategy above to be used, the request should contain the <code class="highlighter-rouge">Authorization</code> HTTP header with the following value: <code class="highlighter-rouge">Bearer &lt;json-web-token&gt;</code></p>
 
-<p>In order to add the strategy to Devise, add this to the <code class="highlighter-rouge">config/devise.rb</code> file:</p>
+<p>In order to add the strategy to Devise, add this to the <code class="highlighter-rouge">config/initializers/devise.rb</code> file:</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="n">config</span><span class="p">.</span><span class="nf">warden</span> <span class="k">do</span> <span class="o">|</span><span class="n">manager</span><span class="o">|</span>
   <span class="n">manager</span><span class="p">.</span><span class="nf">strategies</span><span class="p">.</span><span class="nf">add</span><span class="p">(</span><span class="ss">:jwt</span><span class="p">,</span> <span class="no">Devise</span><span class="o">::</span><span class="no">Strategies</span><span class="o">::</span><span class="no">JsonWebToken</span><span class="p">)</span>

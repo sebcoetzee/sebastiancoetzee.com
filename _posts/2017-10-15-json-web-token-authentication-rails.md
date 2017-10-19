@@ -95,7 +95,7 @@ end
 
 In order for the authentication strategy above to be used, the request should contain the `Authorization` HTTP header with the following value: `Bearer <json-web-token>`
 
-In order to add the strategy to Devise, add this to the `config/devise.rb` file:
+In order to add the strategy to Devise, add this to the `config/initializers/devise.rb` file:
 
 ```ruby
 config.warden do |manager|
