@@ -7,6 +7,17 @@
     <atom:link href="https://sebastiancoetzee.com/feed.xml" rel="self" type="application/rss+xml" />
     
       <item>
+        <title>Testing Go web services using interfaces and mocks</title>
+        <description>
+          
+          As software engineers, we need to have confidence that the solutions we put into production are of the highest quality. This not only allows us to sleep better at night, but it’s important for the business to have faith in the quality of the product. One of the most effective...
+        </description>
+        <pubDate>Mon, 01 Apr 2019 00:00:00 +0200</pubDate>
+        <link>https://sebastiancoetzee.com/2019-04-01-testing-go-web-services-with-interfaces-and-mocks</link>
+        <guid isPermaLink="true">https://sebastiancoetzee.com/2019-04-01-testing-go-web-services-with-interfaces-and-mocks</guid>
+      </item>
+    
+      <item>
         <title>JSON Web Tokens for authentication in distributed systems</title>
         <description>
           

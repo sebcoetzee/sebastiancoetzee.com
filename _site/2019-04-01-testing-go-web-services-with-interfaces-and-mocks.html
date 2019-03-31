@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+  <!-- Beautiful Jekyll | MIT license | Copyright Dean Attali 2016 -->
+  <head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>Testing Go web services using interfaces and mocks</title>
+
+  <meta name="author" content="Sebastian Coetzee" />
+
+  
+
+  <link rel="alternate" type="application/rss+xml" title="Sebastian Coetzee - Software Engineer living in London." href="/feed.xml" />
+
+  
+    
+      <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.0/css/font-awesome.min.css" />
+    
+  
+
+  
+    
+      <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    
+      <link rel="stylesheet" href="/css/bootstrap-social.css" />
+    
+      <link rel="stylesheet" href="/css/main.css" />
+    
+  
+
+  
+    
+      <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+    
+      <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" />
+    
+  
+
+  
+
+  
+
+  
+
+    <!-- Facebook OpenGraph tags -->
+  
+
+  
+  <meta property="og:title" content="Testing Go web services using interfaces and mocks" />
+  
+
+   
+  <meta property="og:description" content="As software engineers, we need to have confidence that the solutions we put into production are of the highest quality. This not only allows us to sleep better at night, but it’s important for the business to have faith in the quality of the product. One of the most effective...">
+  
+
+
+  <meta property="og:type" content="website" />
+
+  
+  <meta property="og:url" content="https://sebastiancoetzee.com/2019-04-01-testing-go-web-services-with-interfaces-and-mocks" />
+  <link rel="canonical" href="https://sebastiancoetzee.com/2019-04-01-testing-go-web-services-with-interfaces-and-mocks" />
+  
+
+  
+  <meta property="og:image" content="https://sebastiancoetzee.com/img/avatar-icon-2.jpg" />
+  
+  
+
+  <!-- Twitter summary cards -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@SebCoetzee" />
+  <meta name="twitter:creator" content="@SebCoetzee" />
+
+  
+  <meta name="twitter:title" content="Testing Go web services using interfaces and mocks" />
+  
+
+  
+  <meta name="twitter:description" content="As software engineers, we need to have confidence that the solutions we put into production are of the highest quality. This not only allows us to sleep better at night, but it’s important for the business to have faith in the quality of the product. One of the most effective...">
+  
+
+  
+  <meta name="twitter:image" content="https://sebastiancoetzee.com/img/avatar-icon-2.jpg" />
+  
+
+</head>
+
+
+  <body>
+  
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="https://sebastiancoetzee.com">Sebastian Coetzee</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+          <li>
+            
+            
+
+
+
+
+
+<a href="/">Home</a>
+
+          </li>
+        
+        
+        
+          <li>
+            
+            
+
+
+
+
+
+<a href="/aboutme">About Me</a>
+
+          </li>
+        
+        
+      </ul>
+    </div>
+
+	
+	<div class="avatar-container">
+	  <div class="avatar-img-border">
+	    <a href="https://sebastiancoetzee.com ">
+	      <img class="avatar-img" src="/img/avatar-icon-2.jpg" />
+		</a>
+	  </div>
+	</div>
+	
+
+  </div>
+</nav>
+
+
+    <!-- TODO this file has become a mess, refactor it -->
+
+
+
+
+
+<header class="header-section ">
+
+<div class="intro-header no-img">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <div class="post-heading">
+          <h1>Testing Go web services using interfaces and mocks</h1>
+		  
+		  
+		  
+		  <span class="post-meta">Posted on April 1, 2019</span>
+		  
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</header>
+
+
+
+
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+
+      <article role="main" class="blog-post">
+        <p>As software engineers, we need to have confidence that the solutions we put into production are of the highest quality. This not only allows us to sleep better at night, but it’s important for the business to have faith in the quality of the product. One of the most effective ways to ensure a high quality is by writing software in such a way that it can be properly tested.</p>
+
+<p>For the past year I’ve been using Golang almost exclusively. It has all the perks you want from a compiled language. It’s fast, compiles to a fat binary, and strict type safety. However, writing testable code requires you to break your software down into logical pieces.</p>
+
+<h2 id="defining-the-goal-posts">Defining the goal posts</h2>
+
+<p>Let’s look at an example of a service we would find in a microservices architecture such as the one at <a href="https://deliveroo.co.uk/">Deliveroo</a>. Obviously this example is greatly simplified and does not accurately represent a system at Deliveroo.</p>
+
+<p>The code referenced in this example is available on <a href="https://github.com/SebastianCoetzee/blog-order-service-example">Github</a>. Please feel free to clone the repo and follow along.</p>
+
+<p>The service shall be called the <code class="highlighter-rouge">OrderService</code> and it will be responsible for showing users a history of their orders. The <code class="highlighter-rouge">OrderService</code> shall have only one endpoint. Here is a description of the endpoint and an example response:</p>
+
+<p>Request URL: <code class="highlighter-rouge">GET /users/:id/orders</code></p>
+
+<p>Response 200 (application/json):</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">6</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"restaurant"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w">
+      </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Nando's"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nt">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">2300</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"currency_code"</span><span class="p">:</span><span class="w"> </span><span class="s2">"GBP"</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"placed_at"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2019-03-30T08:35:30.0108Z"</span><span class="w">
+  </span><span class="p">},</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"restaurant"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="nt">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w">
+      </span><span class="nt">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"KFC"</span><span class="w">
+    </span><span class="p">},</span><span class="w">
+    </span><span class="nt">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">1000</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"currency_code"</span><span class="p">:</span><span class="w"> </span><span class="s2">"GBP"</span><span class="p">,</span><span class="w">
+    </span><span class="nt">"placed_at"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2019-03-27T08:35:30.0108Z"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre>
+</div>
+
+<p>For simplicity, we will ignore where the user’s information is stored. Basically, the system can be described by this diagram:</p>
+
+<p><img src="../img/posts/2019-04-01/order-service-example.png" alt="Basic system architecture" /></p>
+
+<h2 id="planning-for-testability">Planning for testability</h2>
+
+<p>In order for web services to be testable, we need to layer the design in a way that makes sense. The idea is to separate the concerns. Dependencies should be interfaces rather than concrete implementations.</p>
+
+<p>The service should be split into the following layers:</p>
+
+<ul>
+  <li>Data access repositories - interact directly with the database</li>
+  <li>External API clients - call out to external services</li>
+  <li>Services - contain the business logic</li>
+  <li>Handlers - accept requests and builds the repsonses</li>
+</ul>
+
+<h2 id="defining-the-data-model">Defining the data model</h2>
+
+<p>There are essentially two entities that are required given the JSON response of the enpoint: <code class="highlighter-rouge">Order</code> and <code class="highlighter-rouge">Restaurant</code>. They are defined as follows:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c">// Order is the model representation of an order in the data model.</span><span class="x">
+</span><span class="k">type</span><span class="x"> </span><span class="n">Order</span><span class="x"> </span><span class="k">struct</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="n">ID</span><span class="x">           </span><span class="kt">int</span><span class="x">         </span><span class="s">`json:"id"`</span><span class="x">
+	</span><span class="n">UserID</span><span class="x">       </span><span class="kt">int</span><span class="x">         </span><span class="s">`json:"-"`</span><span class="x">
+	</span><span class="n">RestaurantID</span><span class="x"> </span><span class="kt">int</span><span class="x">         </span><span class="s">`json:"-"`</span><span class="x">
+	</span><span class="n">Restaurant</span><span class="x">   </span><span class="o">*</span><span class="n">Restaurant</span><span class="x"> </span><span class="s">`json:"restaurant" sql:"-"`</span><span class="x">
+	</span><span class="n">Total</span><span class="x">        </span><span class="kt">int</span><span class="x">         </span><span class="s">`json:"total"`</span><span class="x">
+	</span><span class="n">CurrencyCode</span><span class="x"> </span><span class="kt">string</span><span class="x">      </span><span class="s">`json:"currency_code"`</span><span class="x">
+	</span><span class="n">PlacedAt</span><span class="x">     </span><span class="n">time</span><span class="o">.</span><span class="n">Time</span><span class="x">   </span><span class="s">`json:"placed_at"`</span><span class="x">
+</span><span class="p">}</span><span class="x">
+
+</span><span class="c">// Orders is a slice of Order pointers.</span><span class="x">
+</span><span class="k">type</span><span class="x"> </span><span class="n">Orders</span><span class="x"> </span><span class="p">[]</span><span class="o">*</span><span class="n">Order</span><span class="x">
+</span></code></pre>
+</div>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c">// Restaurant is the model representation of a restaurant. Restaurants are</span><span class="x">
+</span><span class="c">// stored in the RestaurantService.</span><span class="x">
+</span><span class="k">type</span><span class="x"> </span><span class="n">Restaurant</span><span class="x"> </span><span class="k">struct</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="n">ID</span><span class="x">   </span><span class="kt">int</span><span class="x">    </span><span class="s">`json:"-"`</span><span class="x">
+	</span><span class="n">Name</span><span class="x"> </span><span class="kt">string</span><span class="x"> </span><span class="s">`json:"name"`</span><span class="x">
+</span><span class="p">}</span><span class="x">
+
+</span><span class="c">// Restaurants is a slice of Restaurant pointers.</span><span class="x">
+</span><span class="k">type</span><span class="x"> </span><span class="n">Restaurants</span><span class="x"> </span><span class="p">[]</span><span class="o">*</span><span class="n">Restaurant</span><span class="x">
+</span></code></pre>
+</div>
+
+<h2 id="the-repository-layer">The repository layer</h2>
+
+<p>The repository layer is responsible for connecting directly to the database to retrieve and/or modify records.</p>
+
+<h3 id="the-interface">The interface</h3>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c">// OrderRepository is the interface that an order repository should conform to.</span><span class="x">
+</span><span class="k">type</span><span class="x"> </span><span class="n">OrderRepository</span><span class="x"> </span><span class="k">interface</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="n">FindAllOrdersByUserID</span><span class="p">(</span><span class="n">userID</span><span class="x"> </span><span class="kt">int</span><span class="p">)</span><span class="x"> </span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Orders</span><span class="p">,</span><span class="x"> </span><span class="kt">error</span><span class="p">)</span><span class="x">
+</span><span class="p">}</span><span class="x">
+</span></code></pre>
+</div>
+
+<p>We have defined only one method on the repository, <code class="highlighter-rouge">FindAllOrdersByUserID</code> which will return all orders made by a specific user.</p>
+
+<h3 id="the-default-implementation">The default implementation</h3>
+
+<p>Since we are using <a href="https://github.com/go-pg/pg">go-pg</a> along with the Postgres database, this is what the implementation looks like:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c">// orderRepository is an implementation of an OrderRepository.</span><span class="x">
+</span><span class="k">type</span><span class="x"> </span><span class="n">orderRepository</span><span class="x"> </span><span class="k">struct</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="n">db</span><span class="x"> </span><span class="n">orm</span><span class="o">.</span><span class="n">DB</span><span class="x">
+</span><span class="p">}</span><span class="x">
+
+</span><span class="k">func</span><span class="x"> </span><span class="p">(</span><span class="n">r</span><span class="x"> </span><span class="o">*</span><span class="n">orderRepository</span><span class="p">)</span><span class="x"> </span><span class="n">SetDB</span><span class="p">(</span><span class="n">db</span><span class="x"> </span><span class="n">orm</span><span class="o">.</span><span class="n">DB</span><span class="p">)</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="n">r</span><span class="o">.</span><span class="n">db</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">db</span><span class="x">
+</span><span class="p">}</span><span class="x">
+
+</span><span class="k">func</span><span class="x"> </span><span class="p">(</span><span class="n">r</span><span class="x"> </span><span class="o">*</span><span class="n">orderRepository</span><span class="p">)</span><span class="x"> </span><span class="n">getDB</span><span class="p">()</span><span class="x"> </span><span class="n">orm</span><span class="o">.</span><span class="n">DB</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="k">if</span><span class="x"> </span><span class="n">r</span><span class="o">.</span><span class="n">db</span><span class="x"> </span><span class="o">!=</span><span class="x"> </span><span class="no">nil</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="k">return</span><span class="x"> </span><span class="n">r</span><span class="o">.</span><span class="n">db</span><span class="x">
+	</span><span class="p">}</span><span class="x">
+
+	</span><span class="n">r</span><span class="o">.</span><span class="n">db</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">application</span><span class="o">.</span><span class="n">ResolveDB</span><span class="p">()</span><span class="x">
+	</span><span class="k">return</span><span class="x"> </span><span class="n">r</span><span class="o">.</span><span class="n">db</span><span class="x">
+</span><span class="p">}</span><span class="x">
+
+</span><span class="k">func</span><span class="x"> </span><span class="p">(</span><span class="n">r</span><span class="x"> </span><span class="o">*</span><span class="n">orderRepository</span><span class="p">)</span><span class="x"> </span><span class="n">FindAllOrdersByUserID</span><span class="p">(</span><span class="n">userID</span><span class="x"> </span><span class="kt">int</span><span class="p">)</span><span class="x"> </span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Orders</span><span class="p">,</span><span class="x"> </span><span class="kt">error</span><span class="p">)</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="n">orders</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">models</span><span class="o">.</span><span class="n">Orders</span><span class="p">{}</span><span class="x">
+	</span><span class="n">err</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">r</span><span class="o">.</span><span class="n">getDB</span><span class="p">()</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="o">&amp;</span><span class="n">orders</span><span class="p">)</span><span class="o">.</span><span class="n">Where</span><span class="p">(</span><span class="s">"user_id = ?"</span><span class="p">,</span><span class="x"> </span><span class="n">userID</span><span class="p">)</span><span class="o">.</span><span class="n">Order</span><span class="p">(</span><span class="s">"placed_at DESC"</span><span class="p">)</span><span class="o">.</span><span class="n">Select</span><span class="p">()</span><span class="x">
+	</span><span class="k">return</span><span class="x"> </span><span class="n">orders</span><span class="p">,</span><span class="x"> </span><span class="n">err</span><span class="x">
+</span><span class="p">}</span><span class="x">
+</span></code></pre>
+</div>
+
+<h3 id="testing-the-default-implementation">Testing the default implementation</h3>
+
+<p>The default implementation has to be tested using an actual database to test that the correct information is being returned from the <code class="highlighter-rouge">FindAllOrdersByUserID</code> method. For writing test suites, I prefer using <a href="https://onsi.github.io/ginkgo/">Ginkgo</a>. The test suite needs to cover some basic scenarios we might experience:</p>
+
+<ul>
+  <li>When there are no orders for a user we expect to receive an empty slice of orders in return</li>
+  <li>When there are orders for a user we expect to receive those orders in return</li>
+</ul>
+
+<p>This is the test suite for the <code class="highlighter-rouge">orderRepository</code>:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">package</span><span class="x"> </span><span class="n">repositories_test</span><span class="x">
+
+</span><span class="k">import</span><span class="x"> </span><span class="p">(</span><span class="x">
+	</span><span class="s">"testing"</span><span class="x">
+	</span><span class="s">"time"</span><span class="x">
+
+	</span><span class="s">"github.com/SebastianCoetzee/blog-order-service-example/application"</span><span class="x">
+	</span><span class="s">"github.com/SebastianCoetzee/blog-order-service-example/models"</span><span class="x">
+	</span><span class="s">"github.com/SebastianCoetzee/blog-order-service-example/repositories"</span><span class="x">
+	</span><span class="s">"github.com/go-pg/pg"</span><span class="x">
+	</span><span class="o">.</span><span class="x"> </span><span class="s">"github.com/onsi/ginkgo"</span><span class="x">
+	</span><span class="o">.</span><span class="x"> </span><span class="s">"github.com/onsi/gomega"</span><span class="x">
+</span><span class="p">)</span><span class="x">
+
+</span><span class="k">func</span><span class="x"> </span><span class="n">TestOrderRepository</span><span class="p">(</span><span class="n">t</span><span class="x"> </span><span class="o">*</span><span class="n">testing</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="n">RegisterFailHandler</span><span class="p">(</span><span class="n">Fail</span><span class="p">)</span><span class="x">
+	</span><span class="n">RunSpecs</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="x"> </span><span class="s">"Order Repository Suite"</span><span class="p">)</span><span class="x">
+</span><span class="p">}</span><span class="x">
+
+</span><span class="k">var</span><span class="x"> </span><span class="n">_</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">Describe</span><span class="p">(</span><span class="s">"OrderRespository"</span><span class="p">,</span><span class="x"> </span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="k">var</span><span class="x"> </span><span class="p">(</span><span class="x">
+		</span><span class="n">tx</span><span class="x">        </span><span class="o">*</span><span class="n">pg</span><span class="o">.</span><span class="n">Tx</span><span class="x">
+		</span><span class="n">orderRepo</span><span class="x"> </span><span class="n">repositories</span><span class="o">.</span><span class="n">OrderRepository</span><span class="x">
+		</span><span class="n">orders</span><span class="x">    </span><span class="n">models</span><span class="o">.</span><span class="n">Orders</span><span class="x">
+		</span><span class="n">err</span><span class="x">       </span><span class="kt">error</span><span class="x">
+
+		</span><span class="n">userID</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="m">5</span><span class="x">
+	</span><span class="p">)</span><span class="x">
+
+	</span><span class="n">BeforeEach</span><span class="p">(</span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="n">tx</span><span class="p">,</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">application</span><span class="o">.</span><span class="n">ResolveDB</span><span class="p">()</span><span class="o">.</span><span class="n">Begin</span><span class="p">()</span><span class="x">
+		</span><span class="n">Expect</span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="o">.</span><span class="n">To</span><span class="p">(</span><span class="n">BeNil</span><span class="p">())</span><span class="x">
+		</span><span class="n">orderRepo</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">repositories</span><span class="o">.</span><span class="n">NewOrderRepository</span><span class="p">(</span><span class="n">tx</span><span class="p">)</span><span class="x">
+	</span><span class="p">})</span><span class="x">
+
+	</span><span class="n">Describe</span><span class="p">(</span><span class="s">"FindAllOrdersByUserID"</span><span class="p">,</span><span class="x"> </span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="n">Describe</span><span class="p">(</span><span class="s">"with no records in the database"</span><span class="p">,</span><span class="x"> </span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+			</span><span class="n">It</span><span class="p">(</span><span class="s">"returns an empty slice of orders"</span><span class="p">,</span><span class="x"> </span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+				</span><span class="n">orders</span><span class="p">,</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">orderRepo</span><span class="o">.</span><span class="n">FindAllOrdersByUserID</span><span class="p">(</span><span class="n">userID</span><span class="p">)</span><span class="x">
+				</span><span class="n">Expect</span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="o">.</span><span class="n">To</span><span class="p">(</span><span class="n">BeNil</span><span class="p">())</span><span class="x">
+				</span><span class="n">Expect</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">orders</span><span class="p">))</span><span class="o">.</span><span class="n">To</span><span class="p">(</span><span class="n">Equal</span><span class="p">(</span><span class="m">0</span><span class="p">))</span><span class="x">
+			</span><span class="p">})</span><span class="x">
+		</span><span class="p">})</span><span class="x">
+
+		</span><span class="n">Describe</span><span class="p">(</span><span class="s">"when a few records exist"</span><span class="p">,</span><span class="x"> </span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+			</span><span class="n">BeforeEach</span><span class="p">(</span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+				</span><span class="n">order1</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="o">&amp;</span><span class="n">models</span><span class="o">.</span><span class="n">Order</span><span class="p">{</span><span class="x">
+					</span><span class="n">Total</span><span class="o">:</span><span class="x">        </span><span class="m">1000</span><span class="p">,</span><span class="x">
+					</span><span class="n">CurrencyCode</span><span class="o">:</span><span class="x"> </span><span class="s">"GBP"</span><span class="p">,</span><span class="x">
+					</span><span class="n">UserID</span><span class="o">:</span><span class="x">       </span><span class="n">userID</span><span class="p">,</span><span class="x">
+					</span><span class="n">RestaurantID</span><span class="o">:</span><span class="x"> </span><span class="m">8</span><span class="p">,</span><span class="x">
+					</span><span class="n">PlacedAt</span><span class="o">:</span><span class="x">     </span><span class="n">time</span><span class="o">.</span><span class="n">Now</span><span class="p">()</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="o">-</span><span class="m">72</span><span class="x"> </span><span class="o">*</span><span class="x"> </span><span class="n">time</span><span class="o">.</span><span class="n">Hour</span><span class="p">),</span><span class="x">
+				</span><span class="p">}</span><span class="x">
+				</span><span class="n">err</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">tx</span><span class="o">.</span><span class="n">Insert</span><span class="p">(</span><span class="n">order1</span><span class="p">)</span><span class="x">
+				</span><span class="n">Expect</span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="o">.</span><span class="n">To</span><span class="p">(</span><span class="n">BeNil</span><span class="p">())</span><span class="x">
+
+				</span><span class="n">order2</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="o">&amp;</span><span class="n">models</span><span class="o">.</span><span class="n">Order</span><span class="p">{</span><span class="x">
+					</span><span class="n">Total</span><span class="o">:</span><span class="x">        </span><span class="m">2500</span><span class="p">,</span><span class="x">
+					</span><span class="n">CurrencyCode</span><span class="o">:</span><span class="x"> </span><span class="s">"GBP"</span><span class="p">,</span><span class="x">
+					</span><span class="n">UserID</span><span class="o">:</span><span class="x">       </span><span class="n">userID</span><span class="p">,</span><span class="x">
+					</span><span class="n">RestaurantID</span><span class="o">:</span><span class="x"> </span><span class="m">9</span><span class="p">,</span><span class="x">
+					</span><span class="n">PlacedAt</span><span class="o">:</span><span class="x">     </span><span class="n">time</span><span class="o">.</span><span class="n">Now</span><span class="p">()</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="o">-</span><span class="m">36</span><span class="x"> </span><span class="o">*</span><span class="x"> </span><span class="n">time</span><span class="o">.</span><span class="n">Hour</span><span class="p">),</span><span class="x">
+				</span><span class="p">}</span><span class="x">
+				</span><span class="n">err</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">tx</span><span class="o">.</span><span class="n">Insert</span><span class="p">(</span><span class="n">order2</span><span class="p">)</span><span class="x">
+				</span><span class="n">Expect</span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="o">.</span><span class="n">To</span><span class="p">(</span><span class="n">BeNil</span><span class="p">())</span><span class="x">
+
+				</span><span class="n">order3</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="o">&amp;</span><span class="n">models</span><span class="o">.</span><span class="n">Order</span><span class="p">{</span><span class="x">
+					</span><span class="n">Total</span><span class="o">:</span><span class="x">        </span><span class="m">600</span><span class="p">,</span><span class="x">
+					</span><span class="n">CurrencyCode</span><span class="o">:</span><span class="x"> </span><span class="s">"GBP"</span><span class="p">,</span><span class="x">
+					</span><span class="n">UserID</span><span class="o">:</span><span class="x">       </span><span class="m">7</span><span class="p">,</span><span class="x">
+					</span><span class="n">RestaurantID</span><span class="o">:</span><span class="x"> </span><span class="m">8</span><span class="p">,</span><span class="x">
+					</span><span class="n">PlacedAt</span><span class="o">:</span><span class="x">     </span><span class="n">time</span><span class="o">.</span><span class="n">Now</span><span class="p">()</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="o">-</span><span class="m">24</span><span class="x"> </span><span class="o">*</span><span class="x"> </span><span class="n">time</span><span class="o">.</span><span class="n">Hour</span><span class="p">),</span><span class="x">
+				</span><span class="p">}</span><span class="x">
+				</span><span class="n">err</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">tx</span><span class="o">.</span><span class="n">Insert</span><span class="p">(</span><span class="n">order3</span><span class="p">)</span><span class="x">
+				</span><span class="n">Expect</span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="o">.</span><span class="n">To</span><span class="p">(</span><span class="n">BeNil</span><span class="p">())</span><span class="x">
+			</span><span class="p">})</span><span class="x">
+
+			</span><span class="n">It</span><span class="p">(</span><span class="s">"returns only the records belonging to the user, in order from latest palced_at first"</span><span class="p">,</span><span class="x"> </span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+				</span><span class="n">orders</span><span class="p">,</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">orderRepo</span><span class="o">.</span><span class="n">FindAllOrdersByUserID</span><span class="p">(</span><span class="n">userID</span><span class="p">)</span><span class="x">
+				</span><span class="n">Expect</span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="o">.</span><span class="n">To</span><span class="p">(</span><span class="n">BeNil</span><span class="p">())</span><span class="x">
+				</span><span class="n">Expect</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">orders</span><span class="p">))</span><span class="o">.</span><span class="n">To</span><span class="p">(</span><span class="n">Equal</span><span class="p">(</span><span class="m">2</span><span class="p">))</span><span class="x">
+				</span><span class="n">Expect</span><span class="p">(</span><span class="n">orders</span><span class="p">[</span><span class="m">0</span><span class="p">]</span><span class="o">.</span><span class="n">RestaurantID</span><span class="p">)</span><span class="o">.</span><span class="n">To</span><span class="p">(</span><span class="n">Equal</span><span class="p">(</span><span class="m">9</span><span class="p">))</span><span class="x">
+				</span><span class="n">Expect</span><span class="p">(</span><span class="n">orders</span><span class="p">[</span><span class="m">1</span><span class="p">]</span><span class="o">.</span><span class="n">RestaurantID</span><span class="p">)</span><span class="o">.</span><span class="n">To</span><span class="p">(</span><span class="n">Equal</span><span class="p">(</span><span class="m">8</span><span class="p">))</span><span class="x">
+			</span><span class="p">})</span><span class="x">
+		</span><span class="p">})</span><span class="x">
+	</span><span class="p">})</span><span class="x">
+
+	</span><span class="n">AfterEach</span><span class="p">(</span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="n">err</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">tx</span><span class="o">.</span><span class="n">Rollback</span><span class="p">()</span><span class="x">
+		</span><span class="n">Expect</span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="o">.</span><span class="n">To</span><span class="p">(</span><span class="n">BeNil</span><span class="p">())</span><span class="x">
+	</span><span class="p">})</span><span class="x">
+</span><span class="p">})</span><span class="x">
+</span></code></pre>
+</div>
+
+<p>Now the repository layer is tested and we can start to build on top of this foundation.</p>
+
+<h2 id="external-api-clients">External API clients</h2>
+
+<p>We only have one external API client, to make calls out to the <code class="highlighter-rouge">RestaurantService</code>.</p>
+
+<h3 id="the-interface-1">The interface</h3>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c">// Client is an interface that describes a RestaurantService client.</span><span class="x">
+</span><span class="k">type</span><span class="x"> </span><span class="n">Client</span><span class="x"> </span><span class="k">interface</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="n">GetRestaurantsByIDs</span><span class="p">(</span><span class="n">ids</span><span class="x"> </span><span class="p">[]</span><span class="kt">int</span><span class="p">)</span><span class="x"> </span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Restaurants</span><span class="p">,</span><span class="x"> </span><span class="kt">error</span><span class="p">)</span><span class="x">
+</span><span class="p">}</span><span class="x">
+</span></code></pre>
+</div>
+
+<p>From this we can see that it has only one method and returns a slice of restaurant objects when given a slice of restaurant IDs.</p>
+
+<h3 id="the-default-implementation-1">The default implementation</h3>
+
+<p>This is the <code class="highlighter-rouge">RestaurantService</code>’s HTTP client:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c">// client is an implementation of a RestaurantService client interface.</span><span class="x">
+</span><span class="k">type</span><span class="x"> </span><span class="n">client</span><span class="x"> </span><span class="k">struct</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="n">baseURL</span><span class="x"> </span><span class="kt">string</span><span class="x">
+</span><span class="p">}</span><span class="x">
+
+</span><span class="c">// SetBaseURL overrides the default base URL for the restaurants service.</span><span class="x">
+</span><span class="k">func</span><span class="x"> </span><span class="p">(</span><span class="n">c</span><span class="x"> </span><span class="o">*</span><span class="n">client</span><span class="p">)</span><span class="x"> </span><span class="n">SetBaseURL</span><span class="p">(</span><span class="n">url</span><span class="x"> </span><span class="kt">string</span><span class="p">)</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="n">c</span><span class="o">.</span><span class="n">baseURL</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">url</span><span class="x">
+</span><span class="p">}</span><span class="x">
+
+</span><span class="k">func</span><span class="x"> </span><span class="p">(</span><span class="n">c</span><span class="x"> </span><span class="o">*</span><span class="n">client</span><span class="p">)</span><span class="x"> </span><span class="n">getBaseURL</span><span class="p">()</span><span class="x"> </span><span class="kt">string</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="k">if</span><span class="x"> </span><span class="n">c</span><span class="o">.</span><span class="n">baseURL</span><span class="x"> </span><span class="o">!=</span><span class="x"> </span><span class="s">""</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="k">return</span><span class="x"> </span><span class="n">c</span><span class="o">.</span><span class="n">baseURL</span><span class="x">
+	</span><span class="p">}</span><span class="x">
+
+	</span><span class="n">c</span><span class="o">.</span><span class="n">baseURL</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">os</span><span class="o">.</span><span class="n">Getenv</span><span class="p">(</span><span class="s">"RESTAURANT_SERVICE_BASE_URL"</span><span class="p">)</span><span class="x">
+	</span><span class="k">return</span><span class="x"> </span><span class="n">c</span><span class="o">.</span><span class="n">baseURL</span><span class="x">
+</span><span class="p">}</span><span class="x">
+
+</span><span class="c">// GetRestaurantsByIDs retrieves the Restaurants from the RestaurantService</span><span class="x">
+</span><span class="c">// using a slice of integer IDs.</span><span class="x">
+</span><span class="k">func</span><span class="x"> </span><span class="p">(</span><span class="n">c</span><span class="x"> </span><span class="o">*</span><span class="n">client</span><span class="p">)</span><span class="x"> </span><span class="n">GetRestaurantsByIDs</span><span class="p">(</span><span class="n">ids</span><span class="x"> </span><span class="p">[]</span><span class="kt">int</span><span class="p">)</span><span class="x"> </span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Restaurants</span><span class="p">,</span><span class="x"> </span><span class="kt">error</span><span class="p">)</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="k">if</span><span class="x"> </span><span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span><span class="x"> </span><span class="o">==</span><span class="x"> </span><span class="m">0</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="k">return</span><span class="x"> </span><span class="p">[]</span><span class="o">*</span><span class="n">models</span><span class="o">.</span><span class="n">Restaurant</span><span class="p">{},</span><span class="x"> </span><span class="no">nil</span><span class="x">
+	</span><span class="p">}</span><span class="x">
+
+	</span><span class="n">idStrings</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="nb">make</span><span class="p">([]</span><span class="kt">string</span><span class="p">,</span><span class="x"> </span><span class="m">0</span><span class="p">,</span><span class="x"> </span><span class="nb">len</span><span class="p">(</span><span class="n">ids</span><span class="p">))</span><span class="x">
+	</span><span class="k">for</span><span class="x"> </span><span class="n">_</span><span class="p">,</span><span class="x"> </span><span class="n">id</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="k">range</span><span class="x"> </span><span class="n">ids</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="n">idStrings</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="nb">append</span><span class="p">(</span><span class="n">idStrings</span><span class="p">,</span><span class="x"> </span><span class="n">strconv</span><span class="o">.</span><span class="n">Itoa</span><span class="p">(</span><span class="n">id</span><span class="p">))</span><span class="x">
+	</span><span class="p">}</span><span class="x">
+
+	</span><span class="n">url</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">fmt</span><span class="o">.</span><span class="n">Sprintf</span><span class="p">(</span><span class="x">
+		</span><span class="s">"%s/v1/restaurants?id=%s"</span><span class="p">,</span><span class="x">
+		</span><span class="n">c</span><span class="o">.</span><span class="n">getBaseURL</span><span class="p">(),</span><span class="x">
+		</span><span class="n">strings</span><span class="o">.</span><span class="n">Join</span><span class="p">(</span><span class="n">idStrings</span><span class="p">,</span><span class="x"> </span><span class="s">","</span><span class="p">),</span><span class="x">
+	</span><span class="p">)</span><span class="x">
+
+	</span><span class="n">res</span><span class="p">,</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">http</span><span class="o">.</span><span class="n">Get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="x">
+	</span><span class="k">if</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">!=</span><span class="x"> </span><span class="no">nil</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="k">return</span><span class="x"> </span><span class="no">nil</span><span class="p">,</span><span class="x"> </span><span class="n">err</span><span class="x">
+	</span><span class="p">}</span><span class="x">
+
+	</span><span class="k">if</span><span class="x"> </span><span class="n">res</span><span class="o">.</span><span class="n">StatusCode</span><span class="x"> </span><span class="o">!=</span><span class="x"> </span><span class="m">200</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="k">return</span><span class="x"> </span><span class="no">nil</span><span class="p">,</span><span class="x"> </span><span class="n">errors</span><span class="o">.</span><span class="n">New</span><span class="p">(</span><span class="s">"error retrieving restaurants from RestaurantService"</span><span class="p">)</span><span class="x">
+	</span><span class="p">}</span><span class="x">
+
+	</span><span class="n">body</span><span class="p">,</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">ioutil</span><span class="o">.</span><span class="n">ReadAll</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">Body</span><span class="p">)</span><span class="x">
+	</span><span class="k">if</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">!=</span><span class="x"> </span><span class="no">nil</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="k">return</span><span class="x"> </span><span class="no">nil</span><span class="p">,</span><span class="x"> </span><span class="n">err</span><span class="x">
+	</span><span class="p">}</span><span class="x">
+
+	</span><span class="n">parsedBody</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">models</span><span class="o">.</span><span class="n">Restaurants</span><span class="p">{}</span><span class="x">
+	</span><span class="k">if</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">json</span><span class="o">.</span><span class="n">Unmarshal</span><span class="p">(</span><span class="n">body</span><span class="p">,</span><span class="x"> </span><span class="o">&amp;</span><span class="n">parsedBody</span><span class="p">);</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">!=</span><span class="x"> </span><span class="no">nil</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="k">return</span><span class="x"> </span><span class="no">nil</span><span class="p">,</span><span class="x"> </span><span class="n">err</span><span class="x">
+	</span><span class="p">}</span><span class="x">
+
+	</span><span class="k">return</span><span class="x"> </span><span class="n">parsedBody</span><span class="p">,</span><span class="x"> </span><span class="no">nil</span><span class="x">
+</span><span class="p">}</span><span class="x">
+</span></code></pre>
+</div>
+
+<h2 id="services">Services</h2>
+
+<p>The services layer is responsible for the business logic of the application. The service layer will delegate to the repositories and external API clients in order to focus on the business logic.</p>
+
+<h3 id="the-interface-2">The interface</h3>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c">// OrderService represents the business-logic layer for Orders in the system.</span><span class="x">
+</span><span class="k">type</span><span class="x"> </span><span class="n">OrderService</span><span class="x"> </span><span class="k">interface</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="n">FindAllOrdersByUserID</span><span class="p">(</span><span class="n">userID</span><span class="x"> </span><span class="kt">int</span><span class="p">)</span><span class="x"> </span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Orders</span><span class="p">,</span><span class="x"> </span><span class="kt">error</span><span class="p">)</span><span class="x">
+</span><span class="p">}</span><span class="x">
+</span></code></pre>
+</div>
+
+<p>The interface again has only one method. This service will be responsible for retrieving the orders from the <code class="highlighter-rouge">OrderRepository</code>, augmenting the order data with the restaurant data by calling out to the restaurant API client, and then returning the result.</p>
+
+<h3 id="the-default-implementation-2">The default implementation</h3>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">type</span><span class="x"> </span><span class="n">orderService</span><span class="x"> </span><span class="k">struct</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="n">db</span><span class="x">               </span><span class="n">orm</span><span class="o">.</span><span class="n">DB</span><span class="x">
+	</span><span class="n">restaurantClient</span><span class="x"> </span><span class="n">restaurant</span><span class="o">.</span><span class="n">Client</span><span class="x">
+	</span><span class="n">orderRepository</span><span class="x">  </span><span class="n">repositories</span><span class="o">.</span><span class="n">OrderRepository</span><span class="x">
+</span><span class="p">}</span><span class="x">
+
+</span><span class="k">func</span><span class="x"> </span><span class="p">(</span><span class="n">s</span><span class="x"> </span><span class="o">*</span><span class="n">orderService</span><span class="p">)</span><span class="x"> </span><span class="n">SetOrderRepository</span><span class="p">(</span><span class="n">r</span><span class="x"> </span><span class="n">repositories</span><span class="o">.</span><span class="n">OrderRepository</span><span class="p">)</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="n">s</span><span class="o">.</span><span class="n">orderRepository</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">r</span><span class="x">
+</span><span class="p">}</span><span class="x">
+
+</span><span class="k">func</span><span class="x"> </span><span class="p">(</span><span class="n">s</span><span class="x"> </span><span class="o">*</span><span class="n">orderService</span><span class="p">)</span><span class="x"> </span><span class="n">getOrderRepository</span><span class="p">()</span><span class="x"> </span><span class="n">repositories</span><span class="o">.</span><span class="n">OrderRepository</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="k">if</span><span class="x"> </span><span class="n">s</span><span class="o">.</span><span class="n">orderRepository</span><span class="x"> </span><span class="o">!=</span><span class="x"> </span><span class="no">nil</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="k">return</span><span class="x"> </span><span class="n">s</span><span class="o">.</span><span class="n">orderRepository</span><span class="x">
+	</span><span class="p">}</span><span class="x">
+
+	</span><span class="n">s</span><span class="o">.</span><span class="n">orderRepository</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">repositories</span><span class="o">.</span><span class="n">NewOrderRepository</span><span class="p">(</span><span class="n">application</span><span class="o">.</span><span class="n">ResolveDB</span><span class="p">())</span><span class="x">
+	</span><span class="k">return</span><span class="x"> </span><span class="n">s</span><span class="o">.</span><span class="n">orderRepository</span><span class="x">
+</span><span class="p">}</span><span class="x">
+
+</span><span class="k">func</span><span class="x"> </span><span class="p">(</span><span class="n">s</span><span class="x"> </span><span class="o">*</span><span class="n">orderService</span><span class="p">)</span><span class="x"> </span><span class="n">SetRestaurantClient</span><span class="p">(</span><span class="n">c</span><span class="x"> </span><span class="n">restaurant</span><span class="o">.</span><span class="n">Client</span><span class="p">)</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="n">s</span><span class="o">.</span><span class="n">restaurantClient</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">c</span><span class="x">
+</span><span class="p">}</span><span class="x">
+
+</span><span class="k">func</span><span class="x"> </span><span class="p">(</span><span class="n">s</span><span class="x"> </span><span class="o">*</span><span class="n">orderService</span><span class="p">)</span><span class="x"> </span><span class="n">getRestaurantClient</span><span class="p">()</span><span class="x"> </span><span class="n">restaurant</span><span class="o">.</span><span class="n">Client</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="k">if</span><span class="x"> </span><span class="n">s</span><span class="o">.</span><span class="n">restaurantClient</span><span class="x"> </span><span class="o">!=</span><span class="x"> </span><span class="no">nil</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="k">return</span><span class="x"> </span><span class="n">s</span><span class="o">.</span><span class="n">restaurantClient</span><span class="x">
+	</span><span class="p">}</span><span class="x">
+
+	</span><span class="n">s</span><span class="o">.</span><span class="n">restaurantClient</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">restaurant</span><span class="o">.</span><span class="n">NewClient</span><span class="p">()</span><span class="x">
+	</span><span class="k">return</span><span class="x"> </span><span class="n">s</span><span class="o">.</span><span class="n">restaurantClient</span><span class="x">
+</span><span class="p">}</span><span class="x">
+
+</span><span class="k">func</span><span class="x"> </span><span class="p">(</span><span class="n">s</span><span class="x"> </span><span class="o">*</span><span class="n">orderService</span><span class="p">)</span><span class="x"> </span><span class="n">FindAllOrdersByUserID</span><span class="p">(</span><span class="n">userID</span><span class="x"> </span><span class="kt">int</span><span class="p">)</span><span class="x"> </span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Orders</span><span class="p">,</span><span class="x"> </span><span class="kt">error</span><span class="p">)</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="n">orders</span><span class="p">,</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">s</span><span class="o">.</span><span class="n">getOrderRepository</span><span class="p">()</span><span class="o">.</span><span class="n">FindAllOrdersByUserID</span><span class="p">(</span><span class="n">userID</span><span class="p">)</span><span class="x">
+	</span><span class="k">if</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">!=</span><span class="x"> </span><span class="no">nil</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="k">return</span><span class="x"> </span><span class="no">nil</span><span class="p">,</span><span class="x"> </span><span class="n">err</span><span class="x">
+	</span><span class="p">}</span><span class="x">
+
+	</span><span class="k">if</span><span class="x"> </span><span class="nb">len</span><span class="p">(</span><span class="n">orders</span><span class="p">)</span><span class="x"> </span><span class="o">==</span><span class="x"> </span><span class="m">0</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="k">return</span><span class="x"> </span><span class="n">orders</span><span class="p">,</span><span class="x"> </span><span class="no">nil</span><span class="x">
+	</span><span class="p">}</span><span class="x">
+
+	</span><span class="n">restaurantIDs</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="nb">make</span><span class="p">([]</span><span class="kt">int</span><span class="p">,</span><span class="x"> </span><span class="m">0</span><span class="p">,</span><span class="x"> </span><span class="nb">len</span><span class="p">(</span><span class="n">orders</span><span class="p">))</span><span class="x">
+	</span><span class="k">for</span><span class="x"> </span><span class="n">_</span><span class="p">,</span><span class="x"> </span><span class="n">order</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="k">range</span><span class="x"> </span><span class="n">orders</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="n">restaurantIDs</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="nb">append</span><span class="p">(</span><span class="n">restaurantIDs</span><span class="p">,</span><span class="x"> </span><span class="n">order</span><span class="o">.</span><span class="n">RestaurantID</span><span class="p">)</span><span class="x">
+	</span><span class="p">}</span><span class="x">
+
+	</span><span class="n">restaurants</span><span class="p">,</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">s</span><span class="o">.</span><span class="n">getRestaurantClient</span><span class="p">()</span><span class="o">.</span><span class="n">GetRestaurantsByIDs</span><span class="p">(</span><span class="n">restaurantIDs</span><span class="p">)</span><span class="x">
+	</span><span class="k">if</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">!=</span><span class="x"> </span><span class="no">nil</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="k">return</span><span class="x"> </span><span class="no">nil</span><span class="p">,</span><span class="x"> </span><span class="n">err</span><span class="x">
+	</span><span class="p">}</span><span class="x">
+
+	</span><span class="n">restaurantsByID</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="nb">make</span><span class="p">(</span><span class="k">map</span><span class="p">[</span><span class="kt">int</span><span class="p">]</span><span class="o">*</span><span class="n">models</span><span class="o">.</span><span class="n">Restaurant</span><span class="p">)</span><span class="x">
+	</span><span class="k">for</span><span class="x"> </span><span class="n">_</span><span class="p">,</span><span class="x"> </span><span class="n">restaurant</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="k">range</span><span class="x"> </span><span class="n">restaurants</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="n">restaurantsByID</span><span class="p">[</span><span class="n">restaurant</span><span class="o">.</span><span class="n">ID</span><span class="p">]</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">restaurant</span><span class="x">
+	</span><span class="p">}</span><span class="x">
+
+	</span><span class="k">for</span><span class="x"> </span><span class="n">_</span><span class="p">,</span><span class="x"> </span><span class="n">order</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="k">range</span><span class="x"> </span><span class="n">orders</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="n">restaurant</span><span class="p">,</span><span class="x"> </span><span class="n">ok</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">restaurantsByID</span><span class="p">[</span><span class="n">order</span><span class="o">.</span><span class="n">RestaurantID</span><span class="p">]</span><span class="x">
+		</span><span class="k">if</span><span class="x"> </span><span class="o">!</span><span class="n">ok</span><span class="x"> </span><span class="p">{</span><span class="x">
+			</span><span class="k">return</span><span class="x"> </span><span class="no">nil</span><span class="p">,</span><span class="x"> </span><span class="n">errors</span><span class="o">.</span><span class="n">Errorf</span><span class="p">(</span><span class="s">"restaurant with ID %d not found"</span><span class="p">,</span><span class="x"> </span><span class="n">order</span><span class="o">.</span><span class="n">RestaurantID</span><span class="p">)</span><span class="x">
+		</span><span class="p">}</span><span class="x">
+
+		</span><span class="n">order</span><span class="o">.</span><span class="n">Restaurant</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">restaurant</span><span class="x">
+	</span><span class="p">}</span><span class="x">
+
+	</span><span class="k">return</span><span class="x"> </span><span class="n">orders</span><span class="p">,</span><span class="x"> </span><span class="no">nil</span><span class="x">
+</span><span class="p">}</span><span class="x">
+</span></code></pre>
+</div>
+
+<p>From the code we can see that the <code class="highlighter-rouge">orderService</code> calls out to the <code class="highlighter-rouge">FindAllOrdersByUserID</code> method of the <code class="highlighter-rouge">OrderRepository</code>, then calls out to the restaurant <code class="highlighter-rouge">Client</code> and combines the two results before returning the result to the caller.</p>
+
+<h3 id="testing-the-default-implementation-1">Testing the default implementation</h3>
+
+<p>At this point we need to start talking about how to generate mocks. My preferred mocking library is <a href="https://github.com/golang/mock">golang/mock</a>.</p>
+
+<p>To generate a mock for the <code class="highlighter-rouge">OrderRepository</code>, we use the <code class="highlighter-rouge">mockgen</code> CLI as follows:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>mockgen github.com/SebastianCoetzee/blog-order-service-example/repositories OrderRepository &gt; mock_repositories/mock_order_repository.go
+</code></pre>
+</div>
+
+<p>To generate a mock for the restaurant <code class="highlighter-rouge">Client</code>, we use the <code class="highlighter-rouge">mockgen</code> CLI as follows:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>mockgen github.com/SebastianCoetzee/blog-order-service-example/clients/restaurant Client &gt; clients/mock_restaurant/mock_client.go
+</code></pre>
+</div>
+
+<p>The following scenarios need to be tested for the <code class="highlighter-rouge">orderService</code>:</p>
+
+<ul>
+  <li>When there are no orders for a user, return an empty slice of orders</li>
+  <li>When there are orders for a user, but the restaurant IDs can’t be found by the restaurant client, return an error</li>
+  <li>When there are orders for a user and the restaurant IDs can be found by the restaurant client, return a slice of orders with their restaurant information populated</li>
+</ul>
+
+<p>This is what the test suite looks like:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">package</span><span class="x"> </span><span class="n">services_test</span><span class="x">
+
+</span><span class="k">import</span><span class="x"> </span><span class="p">(</span><span class="x">
+	</span><span class="s">"testing"</span><span class="x">
+	</span><span class="s">"time"</span><span class="x">
+
+	</span><span class="s">"github.com/golang/mock/gomock"</span><span class="x">
+
+	</span><span class="s">"github.com/SebastianCoetzee/blog-order-service-example/clients/mock_restaurant"</span><span class="x">
+	</span><span class="s">"github.com/SebastianCoetzee/blog-order-service-example/clients/restaurant"</span><span class="x">
+	</span><span class="s">"github.com/SebastianCoetzee/blog-order-service-example/mock_repositories"</span><span class="x">
+	</span><span class="s">"github.com/SebastianCoetzee/blog-order-service-example/models"</span><span class="x">
+	</span><span class="s">"github.com/SebastianCoetzee/blog-order-service-example/repositories"</span><span class="x">
+	</span><span class="s">"github.com/SebastianCoetzee/blog-order-service-example/services"</span><span class="x">
+	</span><span class="o">.</span><span class="x"> </span><span class="s">"github.com/onsi/ginkgo"</span><span class="x">
+	</span><span class="o">.</span><span class="x"> </span><span class="s">"github.com/onsi/gomega"</span><span class="x">
+</span><span class="p">)</span><span class="x">
+
+</span><span class="k">func</span><span class="x"> </span><span class="n">TestOrderService</span><span class="p">(</span><span class="n">t</span><span class="x"> </span><span class="o">*</span><span class="n">testing</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="n">RegisterFailHandler</span><span class="p">(</span><span class="n">Fail</span><span class="p">)</span><span class="x">
+	</span><span class="n">RunSpecs</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="x"> </span><span class="s">"Order Service Suite"</span><span class="p">)</span><span class="x">
+</span><span class="p">}</span><span class="x">
+
+</span><span class="k">var</span><span class="x"> </span><span class="n">_</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">Describe</span><span class="p">(</span><span class="s">"OrderService"</span><span class="p">,</span><span class="x"> </span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="k">var</span><span class="x"> </span><span class="p">(</span><span class="x">
+		</span><span class="n">restaurantClient</span><span class="x"> </span><span class="n">restaurant</span><span class="o">.</span><span class="n">Client</span><span class="x">
+		</span><span class="n">orderRepo</span><span class="x">        </span><span class="n">repositories</span><span class="o">.</span><span class="n">OrderRepository</span><span class="x">
+		</span><span class="n">orderService</span><span class="x">     </span><span class="n">services</span><span class="o">.</span><span class="n">OrderService</span><span class="x">
+		</span><span class="n">orders</span><span class="x">           </span><span class="n">models</span><span class="o">.</span><span class="n">Orders</span><span class="x">
+		</span><span class="n">ctrl</span><span class="x">             </span><span class="o">*</span><span class="n">gomock</span><span class="o">.</span><span class="n">Controller</span><span class="x">
+		</span><span class="n">err</span><span class="x">              </span><span class="kt">error</span><span class="x">
+
+		</span><span class="n">userID</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="m">5</span><span class="x">
+	</span><span class="p">)</span><span class="x">
+
+	</span><span class="n">BeforeEach</span><span class="p">(</span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="n">ctrl</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">gomock</span><span class="o">.</span><span class="n">NewController</span><span class="p">(</span><span class="n">GinkgoT</span><span class="p">())</span><span class="x">
+	</span><span class="p">})</span><span class="x">
+
+	</span><span class="n">JustBeforeEach</span><span class="p">(</span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="n">orderServiceImpl</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">services</span><span class="o">.</span><span class="n">NewOrderService</span><span class="p">()</span><span class="x">
+		</span><span class="n">orderServiceImpl</span><span class="o">.</span><span class="n">SetOrderRepository</span><span class="p">(</span><span class="n">orderRepo</span><span class="p">)</span><span class="x">
+		</span><span class="n">orderServiceImpl</span><span class="o">.</span><span class="n">SetRestaurantClient</span><span class="p">(</span><span class="n">restaurantClient</span><span class="p">)</span><span class="x">
+		</span><span class="n">orderService</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">orderServiceImpl</span><span class="x">
+	</span><span class="p">})</span><span class="x">
+
+	</span><span class="n">Describe</span><span class="p">(</span><span class="s">"FindAllOrdersByUserID"</span><span class="p">,</span><span class="x"> </span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="n">Describe</span><span class="p">(</span><span class="s">"with no records in the database"</span><span class="p">,</span><span class="x"> </span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+			</span><span class="n">BeforeEach</span><span class="p">(</span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+				</span><span class="n">orderRepoMock</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">mock_repositories</span><span class="o">.</span><span class="n">NewMockOrderRepository</span><span class="p">(</span><span class="n">ctrl</span><span class="p">)</span><span class="x">
+				</span><span class="n">orderRepoMock</span><span class="o">.</span><span class="n">EXPECT</span><span class="p">()</span><span class="o">.</span><span class="n">FindAllOrdersByUserID</span><span class="p">(</span><span class="n">gomock</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="n">userID</span><span class="p">))</span><span class="x">
+				</span><span class="n">orderRepo</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">orderRepoMock</span><span class="x">
+			</span><span class="p">})</span><span class="x">
+
+			</span><span class="n">It</span><span class="p">(</span><span class="s">"returns an empty slice of orders"</span><span class="p">,</span><span class="x"> </span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+				</span><span class="n">orders</span><span class="p">,</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">orderService</span><span class="o">.</span><span class="n">FindAllOrdersByUserID</span><span class="p">(</span><span class="n">userID</span><span class="p">)</span><span class="x">
+				</span><span class="n">Expect</span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="o">.</span><span class="n">To</span><span class="p">(</span><span class="n">BeNil</span><span class="p">())</span><span class="x">
+				</span><span class="n">Expect</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">orders</span><span class="p">))</span><span class="o">.</span><span class="n">To</span><span class="p">(</span><span class="n">Equal</span><span class="p">(</span><span class="m">0</span><span class="p">))</span><span class="x">
+			</span><span class="p">})</span><span class="x">
+		</span><span class="p">})</span><span class="x">
+
+		</span><span class="n">Describe</span><span class="p">(</span><span class="s">"when a few records exist"</span><span class="p">,</span><span class="x"> </span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+			</span><span class="n">BeforeEach</span><span class="p">(</span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+				</span><span class="n">order1</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="o">&amp;</span><span class="n">models</span><span class="o">.</span><span class="n">Order</span><span class="p">{</span><span class="x">
+					</span><span class="n">Total</span><span class="o">:</span><span class="x">        </span><span class="m">1000</span><span class="p">,</span><span class="x">
+					</span><span class="n">CurrencyCode</span><span class="o">:</span><span class="x"> </span><span class="s">"GBP"</span><span class="p">,</span><span class="x">
+					</span><span class="n">UserID</span><span class="o">:</span><span class="x">       </span><span class="n">userID</span><span class="p">,</span><span class="x">
+					</span><span class="n">RestaurantID</span><span class="o">:</span><span class="x"> </span><span class="m">8</span><span class="p">,</span><span class="x">
+					</span><span class="n">PlacedAt</span><span class="o">:</span><span class="x">     </span><span class="n">time</span><span class="o">.</span><span class="n">Now</span><span class="p">()</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="o">-</span><span class="m">72</span><span class="x"> </span><span class="o">*</span><span class="x"> </span><span class="n">time</span><span class="o">.</span><span class="n">Hour</span><span class="p">),</span><span class="x">
+				</span><span class="p">}</span><span class="x">
+				</span><span class="n">order2</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="o">&amp;</span><span class="n">models</span><span class="o">.</span><span class="n">Order</span><span class="p">{</span><span class="x">
+					</span><span class="n">Total</span><span class="o">:</span><span class="x">        </span><span class="m">2500</span><span class="p">,</span><span class="x">
+					</span><span class="n">CurrencyCode</span><span class="o">:</span><span class="x"> </span><span class="s">"GBP"</span><span class="p">,</span><span class="x">
+					</span><span class="n">UserID</span><span class="o">:</span><span class="x">       </span><span class="n">userID</span><span class="p">,</span><span class="x">
+					</span><span class="n">RestaurantID</span><span class="o">:</span><span class="x"> </span><span class="m">9</span><span class="p">,</span><span class="x">
+					</span><span class="n">PlacedAt</span><span class="o">:</span><span class="x">     </span><span class="n">time</span><span class="o">.</span><span class="n">Now</span><span class="p">()</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="o">-</span><span class="m">36</span><span class="x"> </span><span class="o">*</span><span class="x"> </span><span class="n">time</span><span class="o">.</span><span class="n">Hour</span><span class="p">),</span><span class="x">
+				</span><span class="p">}</span><span class="x">
+
+				</span><span class="n">orderRepoMock</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">mock_repositories</span><span class="o">.</span><span class="n">NewMockOrderRepository</span><span class="p">(</span><span class="n">ctrl</span><span class="p">)</span><span class="x">
+				</span><span class="n">orderRepoMock</span><span class="o">.</span><span class="n">EXPECT</span><span class="p">()</span><span class="o">.</span><span class="x">
+					</span><span class="n">FindAllOrdersByUserID</span><span class="p">(</span><span class="n">gomock</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="n">userID</span><span class="p">))</span><span class="o">.</span><span class="x">
+					</span><span class="n">Return</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Orders</span><span class="p">{</span><span class="n">order2</span><span class="p">,</span><span class="x"> </span><span class="n">order1</span><span class="p">},</span><span class="x"> </span><span class="kt">error</span><span class="p">(</span><span class="no">nil</span><span class="p">))</span><span class="x">
+				</span><span class="n">orderRepo</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">orderRepoMock</span><span class="x">
+			</span><span class="p">})</span><span class="x">
+
+			</span><span class="n">Describe</span><span class="p">(</span><span class="s">"when not all Restaurants can be found"</span><span class="p">,</span><span class="x"> </span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+				</span><span class="n">BeforeEach</span><span class="p">(</span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+					</span><span class="n">restaurantClientMock</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">mock_restaurant</span><span class="o">.</span><span class="n">NewMockClient</span><span class="p">(</span><span class="n">ctrl</span><span class="p">)</span><span class="x">
+					</span><span class="n">restaurantClientMock</span><span class="o">.</span><span class="n">EXPECT</span><span class="p">()</span><span class="o">.</span><span class="x">
+						</span><span class="n">GetRestaurantsByIDs</span><span class="p">(</span><span class="n">gomock</span><span class="o">.</span><span class="n">Eq</span><span class="p">([]</span><span class="kt">int</span><span class="p">{</span><span class="m">9</span><span class="p">,</span><span class="x"> </span><span class="m">8</span><span class="p">}))</span><span class="o">.</span><span class="x">
+						</span><span class="n">Return</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Restaurants</span><span class="p">{},</span><span class="x"> </span><span class="kt">error</span><span class="p">(</span><span class="no">nil</span><span class="p">))</span><span class="x">
+					</span><span class="n">restaurantClient</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">restaurantClientMock</span><span class="x">
+				</span><span class="p">})</span><span class="x">
+
+				</span><span class="n">It</span><span class="p">(</span><span class="s">"returns only the records belonging to the user, in order from latest palced_at first"</span><span class="p">,</span><span class="x"> </span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+					</span><span class="n">orders</span><span class="p">,</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">orderService</span><span class="o">.</span><span class="n">FindAllOrdersByUserID</span><span class="p">(</span><span class="n">userID</span><span class="p">)</span><span class="x">
+					</span><span class="n">Expect</span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="o">.</span><span class="n">To</span><span class="p">(</span><span class="n">MatchError</span><span class="p">(</span><span class="s">"restaurant with ID 9 not found"</span><span class="p">))</span><span class="x">
+				</span><span class="p">})</span><span class="x">
+			</span><span class="p">})</span><span class="x">
+
+			</span><span class="n">Describe</span><span class="p">(</span><span class="s">"when all Restaurants are found"</span><span class="p">,</span><span class="x"> </span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+				</span><span class="n">BeforeEach</span><span class="p">(</span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+					</span><span class="n">restaurant1</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="o">&amp;</span><span class="n">models</span><span class="o">.</span><span class="n">Restaurant</span><span class="p">{</span><span class="x">
+						</span><span class="n">ID</span><span class="o">:</span><span class="x">   </span><span class="m">9</span><span class="p">,</span><span class="x">
+						</span><span class="n">Name</span><span class="o">:</span><span class="x"> </span><span class="s">"Nando's"</span><span class="p">,</span><span class="x">
+					</span><span class="p">}</span><span class="x">
+
+					</span><span class="n">restaurant2</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="o">&amp;</span><span class="n">models</span><span class="o">.</span><span class="n">Restaurant</span><span class="p">{</span><span class="x">
+						</span><span class="n">ID</span><span class="o">:</span><span class="x">   </span><span class="m">8</span><span class="p">,</span><span class="x">
+						</span><span class="n">Name</span><span class="o">:</span><span class="x"> </span><span class="s">"KFC"</span><span class="p">,</span><span class="x">
+					</span><span class="p">}</span><span class="x">
+
+					</span><span class="n">restaurantClientMock</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">mock_restaurant</span><span class="o">.</span><span class="n">NewMockClient</span><span class="p">(</span><span class="n">ctrl</span><span class="p">)</span><span class="x">
+					</span><span class="n">restaurantClientMock</span><span class="o">.</span><span class="n">EXPECT</span><span class="p">()</span><span class="o">.</span><span class="x">
+						</span><span class="n">GetRestaurantsByIDs</span><span class="p">(</span><span class="n">gomock</span><span class="o">.</span><span class="n">Eq</span><span class="p">([]</span><span class="kt">int</span><span class="p">{</span><span class="m">9</span><span class="p">,</span><span class="x"> </span><span class="m">8</span><span class="p">}))</span><span class="o">.</span><span class="x">
+						</span><span class="n">Return</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Restaurants</span><span class="p">{</span><span class="n">restaurant1</span><span class="p">,</span><span class="x"> </span><span class="n">restaurant2</span><span class="p">},</span><span class="x"> </span><span class="kt">error</span><span class="p">(</span><span class="no">nil</span><span class="p">))</span><span class="x">
+					</span><span class="n">restaurantClient</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">restaurantClientMock</span><span class="x">
+				</span><span class="p">})</span><span class="x">
+
+				</span><span class="n">It</span><span class="p">(</span><span class="s">"returns only the records belonging to the user, in order from latest palced_at first"</span><span class="p">,</span><span class="x"> </span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+					</span><span class="n">orders</span><span class="p">,</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">orderService</span><span class="o">.</span><span class="n">FindAllOrdersByUserID</span><span class="p">(</span><span class="n">userID</span><span class="p">)</span><span class="x">
+					</span><span class="n">Expect</span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="o">.</span><span class="n">To</span><span class="p">(</span><span class="n">BeNil</span><span class="p">())</span><span class="x">
+					</span><span class="n">Expect</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">orders</span><span class="p">))</span><span class="o">.</span><span class="n">To</span><span class="p">(</span><span class="n">Equal</span><span class="p">(</span><span class="m">2</span><span class="p">))</span><span class="x">
+					</span><span class="n">Expect</span><span class="p">(</span><span class="n">orders</span><span class="p">[</span><span class="m">0</span><span class="p">]</span><span class="o">.</span><span class="n">Restaurant</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span><span class="o">.</span><span class="n">To</span><span class="p">(</span><span class="n">Equal</span><span class="p">(</span><span class="s">"Nando's"</span><span class="p">))</span><span class="x">
+					</span><span class="n">Expect</span><span class="p">(</span><span class="n">orders</span><span class="p">[</span><span class="m">0</span><span class="p">]</span><span class="o">.</span><span class="n">Total</span><span class="p">)</span><span class="o">.</span><span class="n">To</span><span class="p">(</span><span class="n">Equal</span><span class="p">(</span><span class="m">2500</span><span class="p">))</span><span class="x">
+					</span><span class="n">Expect</span><span class="p">(</span><span class="n">orders</span><span class="p">[</span><span class="m">1</span><span class="p">]</span><span class="o">.</span><span class="n">Restaurant</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span><span class="o">.</span><span class="n">To</span><span class="p">(</span><span class="n">Equal</span><span class="p">(</span><span class="s">"KFC"</span><span class="p">))</span><span class="x">
+					</span><span class="n">Expect</span><span class="p">(</span><span class="n">orders</span><span class="p">[</span><span class="m">1</span><span class="p">]</span><span class="o">.</span><span class="n">Total</span><span class="p">)</span><span class="o">.</span><span class="n">To</span><span class="p">(</span><span class="n">Equal</span><span class="p">(</span><span class="m">1000</span><span class="p">))</span><span class="x">
+				</span><span class="p">})</span><span class="x">
+			</span><span class="p">})</span><span class="x">
+		</span><span class="p">})</span><span class="x">
+	</span><span class="p">})</span><span class="x">
+
+	</span><span class="n">AfterEach</span><span class="p">(</span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="n">ctrl</span><span class="o">.</span><span class="n">Finish</span><span class="p">()</span><span class="x">
+	</span><span class="p">})</span><span class="x">
+</span><span class="p">})</span><span class="x">
+</span></code></pre>
+</div>
+
+<p>Take particular note of how the <code class="highlighter-rouge">OrderRepository</code> and restaurant <code class="highlighter-rouge">Client</code> is mocked out in the tests. By depending on interfaces and not concrete implementations, we are able to mock out these dependencies in order to allow the code to be tested.</p>
+
+<h2 id="handlers">Handlers</h2>
+
+<p>The handler layer is responsible for parsing a request, calling out the the relevant service and then returning a response to the caller.</p>
+
+<h3 id="generating-an-interface-for-the-gin-context">Generating an interface for the gin Context</h3>
+
+<p>Since the project is using <a href="https://github.com/gin-gonic/gin">gin</a>, we need to generate a <code class="highlighter-rouge">Context</code> interface so that we can mock out the <code class="highlighter-rouge">*gin.Context</code> in tests. This is done using the <a href="https://github.com/vburenin/ifacemaker">ifacemaker</a> CLI:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>ifacemaker -f vendor/github.com/gin-gonic/gin/context.go -s Context -i Context -p handlers &gt; handlers/context.go
+</code></pre>
+</div>
+
+<h3 id="the-endpoint-provider">The endpoint provider</h3>
+
+<p>In order to allow dependencies to be injected, we shall declare an endpoint <code class="highlighter-rouge">Provider</code> that will hold the dependencies required by the handlers. This is what the <code class="highlighter-rouge">Provider</code> looks like:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c">// Provider is the endpoint provider that holds the dependencies for the</span><span class="x">
+</span><span class="c">// endpoints.</span><span class="x">
+</span><span class="k">type</span><span class="x"> </span><span class="n">Provider</span><span class="x"> </span><span class="k">struct</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="n">orderService</span><span class="x"> </span><span class="n">services</span><span class="o">.</span><span class="n">OrderService</span><span class="x">
+</span><span class="p">}</span><span class="x">
+
+</span><span class="c">// SetOrderService sets the OrderService dependency on the Provider.</span><span class="x">
+</span><span class="k">func</span><span class="x"> </span><span class="p">(</span><span class="n">p</span><span class="x"> </span><span class="o">*</span><span class="n">Provider</span><span class="p">)</span><span class="x"> </span><span class="n">SetOrderService</span><span class="p">(</span><span class="n">s</span><span class="x"> </span><span class="n">services</span><span class="o">.</span><span class="n">OrderService</span><span class="p">)</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="n">p</span><span class="o">.</span><span class="n">orderService</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">s</span><span class="x">
+</span><span class="p">}</span><span class="x">
+
+</span><span class="k">func</span><span class="x"> </span><span class="p">(</span><span class="n">p</span><span class="x"> </span><span class="o">*</span><span class="n">Provider</span><span class="p">)</span><span class="x"> </span><span class="n">getOrderService</span><span class="p">()</span><span class="x"> </span><span class="n">services</span><span class="o">.</span><span class="n">OrderService</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="k">if</span><span class="x"> </span><span class="n">p</span><span class="o">.</span><span class="n">orderService</span><span class="x"> </span><span class="o">!=</span><span class="x"> </span><span class="no">nil</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="k">return</span><span class="x"> </span><span class="n">p</span><span class="o">.</span><span class="n">orderService</span><span class="x">
+	</span><span class="p">}</span><span class="x">
+
+	</span><span class="n">p</span><span class="o">.</span><span class="n">orderService</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">services</span><span class="o">.</span><span class="n">NewOrderService</span><span class="p">()</span><span class="x">
+	</span><span class="k">return</span><span class="x"> </span><span class="n">p</span><span class="o">.</span><span class="n">orderService</span><span class="x">
+</span><span class="p">}</span><span class="x">
+</span></code></pre>
+</div>
+
+<p>Notice how the <code class="highlighter-rouge">OrderService</code> is held as an attribute on the <code class="highlighter-rouge">Provider</code>. This is done so that the order service can be mocked out in a test.</p>
+
+<p>The handler method is defined as follows:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c">// FindOrdersForUser gets the orders for a user from the user's ID.</span><span class="x">
+</span><span class="k">func</span><span class="x"> </span><span class="n">FindOrdersForUser</span><span class="p">(</span><span class="n">c</span><span class="x"> </span><span class="o">*</span><span class="n">gin</span><span class="o">.</span><span class="n">Context</span><span class="p">)</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="n">p</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="o">&amp;</span><span class="n">Provider</span><span class="p">{}</span><span class="x">
+	</span><span class="n">p</span><span class="o">.</span><span class="n">FindOrdersForUser</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="x">
+</span><span class="p">}</span><span class="x">
+
+</span><span class="c">// FindOrdersForUser is the provider method that gets the orders for a user from</span><span class="x">
+</span><span class="c">// the user's ID.</span><span class="x">
+</span><span class="k">func</span><span class="x"> </span><span class="p">(</span><span class="n">p</span><span class="x"> </span><span class="o">*</span><span class="n">Provider</span><span class="p">)</span><span class="x"> </span><span class="n">FindOrdersForUser</span><span class="p">(</span><span class="n">c</span><span class="x"> </span><span class="n">Context</span><span class="p">)</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="n">userID</span><span class="p">,</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">strconv</span><span class="o">.</span><span class="n">Atoi</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">Param</span><span class="p">(</span><span class="s">"id"</span><span class="p">))</span><span class="x">
+	</span><span class="k">if</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">!=</span><span class="x"> </span><span class="no">nil</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="n">c</span><span class="o">.</span><span class="n">Status</span><span class="p">(</span><span class="n">http</span><span class="o">.</span><span class="n">StatusBadRequest</span><span class="p">)</span><span class="x">
+		</span><span class="k">return</span><span class="x">
+	</span><span class="p">}</span><span class="x">
+
+	</span><span class="n">orders</span><span class="p">,</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">p</span><span class="o">.</span><span class="n">getOrderService</span><span class="p">()</span><span class="o">.</span><span class="n">FindAllOrdersByUserID</span><span class="p">(</span><span class="n">userID</span><span class="p">)</span><span class="x">
+	</span><span class="k">if</span><span class="x"> </span><span class="n">err</span><span class="x"> </span><span class="o">!=</span><span class="x"> </span><span class="no">nil</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="n">c</span><span class="o">.</span><span class="n">Status</span><span class="p">(</span><span class="n">http</span><span class="o">.</span><span class="n">StatusInternalServerError</span><span class="p">)</span><span class="x">
+		</span><span class="k">return</span><span class="x">
+	</span><span class="p">}</span><span class="x">
+
+	</span><span class="n">c</span><span class="o">.</span><span class="n">JSON</span><span class="p">(</span><span class="n">http</span><span class="o">.</span><span class="n">StatusOK</span><span class="p">,</span><span class="x"> </span><span class="n">orders</span><span class="p">)</span><span class="x">
+</span><span class="p">}</span><span class="x">
+</span></code></pre>
+</div>
+
+<p>Notice that the <code class="highlighter-rouge">FindOrdersForUser</code> accepts the generated <code class="highlighter-rouge">Context</code> interface and not the standard <code class="highlighter-rouge">*gin.Context</code>.</p>
+
+<h3 id="testing-the-handler">Testing the handler</h3>
+
+<p>The following scenarios need to be tested for the <code class="highlighter-rouge">Provider</code>:</p>
+
+<ul>
+  <li>When an invalid ID is given, the handler should return a 400</li>
+  <li>When an error is returned from the <code class="highlighter-rouge">OrderService</code>, the handler should return a 500</li>
+  <li>When orders are returned from the <code class="highlighter-rouge">OrderService</code>, the handler should return a 200 along with the serialised JSON</li>
+</ul>
+
+<p>This is what the test suite looks like:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">package</span><span class="x"> </span><span class="n">handlers_test</span><span class="x">
+
+</span><span class="k">import</span><span class="x"> </span><span class="p">(</span><span class="x">
+	</span><span class="s">"errors"</span><span class="x">
+	</span><span class="s">"testing"</span><span class="x">
+
+	</span><span class="s">"github.com/golang/mock/gomock"</span><span class="x">
+
+	</span><span class="s">"github.com/SebastianCoetzee/blog-order-service-example/handlers"</span><span class="x">
+	</span><span class="s">"github.com/SebastianCoetzee/blog-order-service-example/mock_handlers"</span><span class="x">
+	</span><span class="s">"github.com/SebastianCoetzee/blog-order-service-example/mock_services"</span><span class="x">
+	</span><span class="s">"github.com/SebastianCoetzee/blog-order-service-example/models"</span><span class="x">
+	</span><span class="s">"github.com/SebastianCoetzee/blog-order-service-example/services"</span><span class="x">
+	</span><span class="o">.</span><span class="x"> </span><span class="s">"github.com/onsi/ginkgo"</span><span class="x">
+	</span><span class="o">.</span><span class="x"> </span><span class="s">"github.com/onsi/gomega"</span><span class="x">
+</span><span class="p">)</span><span class="x">
+
+</span><span class="k">func</span><span class="x"> </span><span class="n">TestHandlers</span><span class="p">(</span><span class="n">t</span><span class="x"> </span><span class="o">*</span><span class="n">testing</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="n">RegisterFailHandler</span><span class="p">(</span><span class="n">Fail</span><span class="p">)</span><span class="x">
+	</span><span class="n">RunSpecs</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="x"> </span><span class="s">"Handlers Suite"</span><span class="p">)</span><span class="x">
+</span><span class="p">}</span><span class="x">
+
+</span><span class="k">var</span><span class="x"> </span><span class="n">_</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">Describe</span><span class="p">(</span><span class="s">"FindOrdersForUser"</span><span class="p">,</span><span class="x"> </span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+	</span><span class="k">var</span><span class="x"> </span><span class="p">(</span><span class="x">
+		</span><span class="n">c</span><span class="x">            </span><span class="n">handlers</span><span class="o">.</span><span class="n">Context</span><span class="x">
+		</span><span class="n">p</span><span class="x">            </span><span class="o">*</span><span class="n">handlers</span><span class="o">.</span><span class="n">Provider</span><span class="x">
+		</span><span class="n">orderService</span><span class="x"> </span><span class="n">services</span><span class="o">.</span><span class="n">OrderService</span><span class="x">
+		</span><span class="n">ctrl</span><span class="x">         </span><span class="o">*</span><span class="n">gomock</span><span class="o">.</span><span class="n">Controller</span><span class="x">
+	</span><span class="p">)</span><span class="x">
+
+	</span><span class="n">BeforeEach</span><span class="p">(</span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="n">ctrl</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">gomock</span><span class="o">.</span><span class="n">NewController</span><span class="p">(</span><span class="n">GinkgoT</span><span class="p">())</span><span class="x">
+	</span><span class="p">})</span><span class="x">
+
+	</span><span class="n">JustBeforeEach</span><span class="p">(</span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="n">p</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="o">&amp;</span><span class="n">handlers</span><span class="o">.</span><span class="n">Provider</span><span class="p">{}</span><span class="x">
+		</span><span class="n">p</span><span class="o">.</span><span class="n">SetOrderService</span><span class="p">(</span><span class="n">orderService</span><span class="p">)</span><span class="x">
+	</span><span class="p">})</span><span class="x">
+
+	</span><span class="n">Describe</span><span class="p">(</span><span class="s">"with an invalid ID"</span><span class="p">,</span><span class="x"> </span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="n">BeforeEach</span><span class="p">(</span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+			</span><span class="n">mockContext</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">mock_handlers</span><span class="o">.</span><span class="n">NewMockContext</span><span class="p">(</span><span class="n">ctrl</span><span class="p">)</span><span class="x">
+			</span><span class="n">mockContext</span><span class="o">.</span><span class="n">EXPECT</span><span class="p">()</span><span class="o">.</span><span class="n">Param</span><span class="p">(</span><span class="n">gomock</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="s">"id"</span><span class="p">))</span><span class="o">.</span><span class="n">Return</span><span class="p">(</span><span class="s">"invalid_id"</span><span class="p">)</span><span class="x">
+			</span><span class="n">mockContext</span><span class="o">.</span><span class="n">EXPECT</span><span class="p">()</span><span class="o">.</span><span class="n">Status</span><span class="p">(</span><span class="n">gomock</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="m">400</span><span class="p">))</span><span class="x">
+			</span><span class="n">c</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">mockContext</span><span class="x">
+		</span><span class="p">})</span><span class="x">
+
+		</span><span class="n">It</span><span class="p">(</span><span class="s">"should return a 400"</span><span class="p">,</span><span class="x"> </span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+			</span><span class="n">p</span><span class="o">.</span><span class="n">FindOrdersForUser</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="x">
+		</span><span class="p">})</span><span class="x">
+	</span><span class="p">})</span><span class="x">
+
+	</span><span class="n">Describe</span><span class="p">(</span><span class="s">"with a valid ID"</span><span class="p">,</span><span class="x"> </span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="n">Describe</span><span class="p">(</span><span class="s">"when an error is returned from the OrderService"</span><span class="p">,</span><span class="x"> </span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+			</span><span class="n">BeforeEach</span><span class="p">(</span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+				</span><span class="n">mockContext</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">mock_handlers</span><span class="o">.</span><span class="n">NewMockContext</span><span class="p">(</span><span class="n">ctrl</span><span class="p">)</span><span class="x">
+				</span><span class="n">mockContext</span><span class="o">.</span><span class="n">EXPECT</span><span class="p">()</span><span class="o">.</span><span class="n">Param</span><span class="p">(</span><span class="n">gomock</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="s">"id"</span><span class="p">))</span><span class="o">.</span><span class="n">Return</span><span class="p">(</span><span class="s">"5"</span><span class="p">)</span><span class="x">
+				</span><span class="n">mockContext</span><span class="o">.</span><span class="n">EXPECT</span><span class="p">()</span><span class="o">.</span><span class="n">Status</span><span class="p">(</span><span class="n">gomock</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="m">500</span><span class="p">))</span><span class="x">
+				</span><span class="n">c</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">mockContext</span><span class="x">
+
+				</span><span class="n">mockOrderService</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">mock_services</span><span class="o">.</span><span class="n">NewMockOrderService</span><span class="p">(</span><span class="n">ctrl</span><span class="p">)</span><span class="x">
+				</span><span class="n">mockOrderService</span><span class="o">.</span><span class="n">EXPECT</span><span class="p">()</span><span class="o">.</span><span class="n">FindAllOrdersByUserID</span><span class="p">(</span><span class="n">gomock</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="m">5</span><span class="p">))</span><span class="o">.</span><span class="n">Return</span><span class="p">(</span><span class="no">nil</span><span class="p">,</span><span class="x"> </span><span class="n">errors</span><span class="o">.</span><span class="n">New</span><span class="p">(</span><span class="s">"some error"</span><span class="p">))</span><span class="x">
+				</span><span class="n">orderService</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">mockOrderService</span><span class="x">
+			</span><span class="p">})</span><span class="x">
+
+			</span><span class="n">It</span><span class="p">(</span><span class="s">"should return a 500"</span><span class="p">,</span><span class="x"> </span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+				</span><span class="n">p</span><span class="o">.</span><span class="n">FindOrdersForUser</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="x">
+			</span><span class="p">})</span><span class="x">
+		</span><span class="p">})</span><span class="x">
+
+		</span><span class="n">Describe</span><span class="p">(</span><span class="s">"when the OrderService returns an order"</span><span class="p">,</span><span class="x"> </span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+			</span><span class="n">BeforeEach</span><span class="p">(</span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+				</span><span class="n">orders</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">models</span><span class="o">.</span><span class="n">Orders</span><span class="p">{}</span><span class="x">
+				</span><span class="n">orders</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="nb">append</span><span class="p">(</span><span class="n">orders</span><span class="p">,</span><span class="x"> </span><span class="o">&amp;</span><span class="n">models</span><span class="o">.</span><span class="n">Order</span><span class="p">{</span><span class="x">
+					</span><span class="n">ID</span><span class="o">:</span><span class="x"> </span><span class="m">5</span><span class="p">,</span><span class="x">
+					</span><span class="n">Restaurant</span><span class="o">:</span><span class="x"> </span><span class="o">&amp;</span><span class="n">models</span><span class="o">.</span><span class="n">Restaurant</span><span class="p">{</span><span class="x">
+						</span><span class="n">ID</span><span class="o">:</span><span class="x">   </span><span class="m">9</span><span class="p">,</span><span class="x">
+						</span><span class="n">Name</span><span class="o">:</span><span class="x"> </span><span class="s">"Nando's"</span><span class="p">,</span><span class="x">
+					</span><span class="p">},</span><span class="x">
+				</span><span class="p">})</span><span class="x">
+
+				</span><span class="n">mockContext</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">mock_handlers</span><span class="o">.</span><span class="n">NewMockContext</span><span class="p">(</span><span class="n">ctrl</span><span class="p">)</span><span class="x">
+				</span><span class="n">mockContext</span><span class="o">.</span><span class="n">EXPECT</span><span class="p">()</span><span class="o">.</span><span class="n">Param</span><span class="p">(</span><span class="n">gomock</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="s">"id"</span><span class="p">))</span><span class="o">.</span><span class="n">Return</span><span class="p">(</span><span class="s">"5"</span><span class="p">)</span><span class="x">
+				</span><span class="n">mockContext</span><span class="o">.</span><span class="n">EXPECT</span><span class="p">()</span><span class="o">.</span><span class="n">JSON</span><span class="p">(</span><span class="n">gomock</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="m">200</span><span class="p">),</span><span class="x"> </span><span class="n">gomock</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="n">orders</span><span class="p">))</span><span class="x">
+				</span><span class="n">c</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">mockContext</span><span class="x">
+
+				</span><span class="n">mockOrderService</span><span class="x"> </span><span class="o">:=</span><span class="x"> </span><span class="n">mock_services</span><span class="o">.</span><span class="n">NewMockOrderService</span><span class="p">(</span><span class="n">ctrl</span><span class="p">)</span><span class="x">
+				</span><span class="n">mockOrderService</span><span class="o">.</span><span class="n">EXPECT</span><span class="p">()</span><span class="o">.</span><span class="n">FindAllOrdersByUserID</span><span class="p">(</span><span class="n">gomock</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="m">5</span><span class="p">))</span><span class="o">.</span><span class="n">Return</span><span class="p">(</span><span class="n">orders</span><span class="p">,</span><span class="x"> </span><span class="kt">error</span><span class="p">(</span><span class="no">nil</span><span class="p">))</span><span class="x">
+				</span><span class="n">orderService</span><span class="x"> </span><span class="o">=</span><span class="x"> </span><span class="n">mockOrderService</span><span class="x">
+			</span><span class="p">})</span><span class="x">
+
+			</span><span class="n">It</span><span class="p">(</span><span class="s">"should return a 200 with the JSON response"</span><span class="p">,</span><span class="x"> </span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+				</span><span class="n">p</span><span class="o">.</span><span class="n">FindOrdersForUser</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="x">
+			</span><span class="p">})</span><span class="x">
+		</span><span class="p">})</span><span class="x">
+	</span><span class="p">})</span><span class="x">
+
+	</span><span class="n">AfterEach</span><span class="p">(</span><span class="k">func</span><span class="p">()</span><span class="x"> </span><span class="p">{</span><span class="x">
+		</span><span class="n">ctrl</span><span class="o">.</span><span class="n">Finish</span><span class="p">()</span><span class="x">
+	</span><span class="p">})</span><span class="x">
+</span><span class="p">})</span><span class="x">
+</span></code></pre>
+</div>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>As software engineers, we should ensure that our software is well-tested in order to keep the quality bar as high as possible.</p>
+
+<p>In order to write code that is testable, the software should be divided up into logical layers with a separation of concerns. The different layers should interact with each other through interfaces rather than through concrete implementations. Mocks can be generated using tools in order to speed up development.</p>
+
+<p>By using a test suite, interfaces and mocks, we can ensure a high quality of our software by having good test coverage.</p>
+
+      </article>
+
+      
+
+      
+        <!-- Check if any share-links are active -->
+
+
+
+
+<section id = "social-share-section">
+
+  <!--- Share on Twitter -->
+  
+    <a href="https://twitter.com/intent/tweet?text=Testing+Go+web+services+using+interfaces+and+mocks+https://sebastiancoetzee.com/2019-04-01-testing-go-web-services-with-interfaces-and-mocks"
+      class="btn btn-social-icon btn-twitter" title="Share on Twitter">
+      <span class="fa fa-fw fa-twitter" aria-hidden="true"></span>
+    </a>
+  
+
+  <!--- Share on Facebook -->
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=https://sebastiancoetzee.com/2019-04-01-testing-go-web-services-with-interfaces-and-mocks"
+      class="btn btn-social-icon btn-facebook" title="Share on Facebook">
+      <span class="fa fa-fw fa-facebook" aria-hidden="true"></span>
+    </a>
+  
+
+  <!--- Share on Google Plus -->
+  
+
+  <!--- Share on LinkedIn -->
+  
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://sebastiancoetzee.com/2019-04-01-testing-go-web-services-with-interfaces-and-mocks"
+      class="btn btn-social-icon btn-linkedin" title="Share on LinkedIn">
+      <span class="fa fa-fw fa-linkedin" aria-hidden="true"></span>
+    </a>
+  
+
+</section>
+
+
+
+      
+
+      <ul class="pager blog-pager">
+        
+        <li class="previous">
+          <a href="/2017-10-15-json-web-token-authentication-rails" data-toggle="tooltip" data-placement="top" title="JSON Web Tokens for authentication in distributed systems">&larr; Previous Post</a>
+        </li>
+        
+        
+      </ul>
+
+      
+        <div class="disqus-comments">
+          
+
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+    <footer>
+  <div class="container beautiful-jekyll-footer">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+          <li>
+            <a href="https://www.facebook.com/sebastian.coetzee" title="Facebook">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+          <li>
+            <a href="https://github.com/SebastianCoetzee" title="GitHub">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+		  
+          <li>
+            <a href="https://twitter.com/SebCoetzee" title="Twitter">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+	  
+      
+		  
+          <li>
+            <a href="mailto:mail@sebastiancoetzee.com" title="Email me">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+		  
+          <li>
+            <a href="https://linkedin.com/in/in/sebastiancoetzee" title="LinkedIn">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+		  
+		  
+          <li>
+            <a href="https://stackoverflow.com/users/2694045/sebastian-coetzee" title="StackOverflow">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+      
+      
+      
+      
+		  
+        </ul>
+        <p class="copyright text-muted">
+		  Sebastian Coetzee
+		  &nbsp;&bull;&nbsp;
+		  2019
+
+		  
+		  &nbsp;&bull;&nbsp;
+		  <a href="https://sebastiancoetzee.com">SebastianCoetzee.com</a>
+		  
+	    </p>
+	        <!-- Please don't remove this, keep my open source work credited :) -->
+		<p class="theme-by text-muted">
+		  Theme by
+		  <a href="http://deanattali.com/beautiful-jekyll/">beautiful-jekyll</a>
+		</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  
+    
+
+
+
+
+
+
+  
+    <!-- doing something a bit funky here because I want to be careful not to include JQuery twice! -->
+    
+      <script>
+      	if (typeof jQuery == 'undefined') {
+      	  document.write('<script src="/js/jquery-1.11.2.min.js"></scr' + 'ipt>');
+      	}
+      </script>
+    
+  
+    <!-- doing something a bit funky here because I want to be careful not to include JQuery twice! -->
+    
+	<script src="/js/bootstrap.min.js"></script>
+    
+  
+    <!-- doing something a bit funky here because I want to be careful not to include JQuery twice! -->
+    
+	<script src="/js/main.js"></script>
+    
+  
+
+
+
+	<!-- Google Analytics -->
+	<script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+		ga('create', 'UA-28366174-2', 'auto');
+		ga('send', 'pageview');
+	</script>
+	<!-- End Google Analytics -->
+
+
+  
+  </body>
+</html>
