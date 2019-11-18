@@ -15,17 +15,17 @@ Typically the modals are very simple, as the one in the image. It will either gi
 
 Each component in React requires a root where it is mounted. This is the structure of my HTML document:
 
-{% gist SebastianCoetzee/5ccfe6b657840e7d5069 %}
+{% gist sebcoetzee/5ccfe6b657840e7d5069 %}
 
 The `<div id="modal"></div>` tag is used as the root for the modal boxes to render inside. All modals are rendered inside of a so-called ModalsComponent that acts as the parent for all modals:
 
-{% gist SebastianCoetzee/615db804aeb2e3bee0c8 %}
+{% gist sebcoetzee/615db804aeb2e3bee0c8 %}
 
 An important thing to notice about this module is the `registerModal` method. This method will be used to add modals to the ModalsComponent in a way that allows us to add new modals without modifying any of the code on the ModalsComponent module itself. It is worth mentioning at this point that I use [Browserify](http://browserify.org/) in order to package my apps into a single file. I highly recommend you check it out. I also use [React Bootstrap](https://react-bootstrap.github.io/) for the CSS goodness.
 
 Now for the actual modals that are visible to the user. The code for the error modal is as follows:
 
-{% gist SebastianCoetzee/07e7d3d95ddeaec76d4f %}
+{% gist sebcoetzee/07e7d3d95ddeaec76d4f %}
 
 Notice how the modal error box is registered with the ModalsComponent by passing it to the `registerModal` method mentioned above.
 
@@ -37,7 +37,7 @@ The information modal is an exact copy of the error component apart from the tit
 
 Confirmation is slightly different since the user has two options when the modal pops up, namely to click 'OK' or to click 'Cancel'.
 
-{% gist SebastianCoetzee/72f537102ba58b075321 %}
+{% gist sebcoetzee/72f537102ba58b075321 %}
 
 The default behaviour for the 'Cancel' button is assumed and only the handler that will be called when the 'OK' button is clicked can be passed in.
 
@@ -45,6 +45,6 @@ Similar to the error modal, the confirmation modal listens for the `onShowConfir
 
 Here is an example of triggering a modal error with a custom callback function. In this example, the user is notified that they are not logged in and they are then redirected to the login page after they close the error modal.
 
-{% gist SebastianCoetzee/f5391d44b98a20bd00ed %}
+{% gist sebcoetzee/f5391d44b98a20bd00ed %}
 
 The effect of this pattern is that it decouples the management of the display of modal popups from the state of the views themselves. The implementation of the modal's markup is abstracted away into a couple of generic types of popups that can be called from the view by triggering the events that the modals are listening for.

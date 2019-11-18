@@ -210,7 +210,7 @@
         &lt;script src=&quot;app.js&quot;&gt;&lt;/script&gt;
     &lt;/body&gt;
 &lt;/html&gt;</pre></noscript>
-<script src="https://gist.github.com/SebastianCoetzee/5ccfe6b657840e7d5069.js"> </script>
+<script src="https://gist.github.com/sebcoetzee/5ccfe6b657840e7d5069.js"> </script>
 
 <p>The <code class="highlighter-rouge">&lt;div id="modal"&gt;&lt;/div&gt;</code> tag is used as the root for the modal boxes to render inside. All modals are rendered inside of a so-called ModalsComponent that acts as the parent for all modals:</p>
 
@@ -260,7 +260,7 @@ module.exports = {
 
 };
 </pre></noscript>
-<script src="https://gist.github.com/SebastianCoetzee/615db804aeb2e3bee0c8.js"> </script>
+<script src="https://gist.github.com/sebcoetzee/615db804aeb2e3bee0c8.js"> </script>
 
 <p>An important thing to notice about this module is the <code class="highlighter-rouge">registerModal</code> method. This method will be used to add modals to the ModalsComponent in a way that allows us to add new modals without modifying any of the code on the ModalsComponent module itself. It is worth mentioning at this point that I use <a href="http://browserify.org/">Browserify</a> in order to package my apps into a single file. I highly recommend you check it out. I also use <a href="https://react-bootstrap.github.io/">React Bootstrap</a> for the CSS goodness.</p>
 
@@ -398,7 +398,7 @@ modals.registerModal(
     )
 );
 </pre></noscript>
-<script src="https://gist.github.com/SebastianCoetzee/07e7d3d95ddeaec76d4f.js"> </script>
+<script src="https://gist.github.com/sebcoetzee/07e7d3d95ddeaec76d4f.js"> </script>
 
 <p>Notice how the modal error box is registered with the ModalsComponent by passing it to the <code class="highlighter-rouge">registerModal</code> method mentioned above.</p>
 
@@ -542,7 +542,7 @@ modals.registerModal(
     )
 );
 </pre></noscript>
-<script src="https://gist.github.com/SebastianCoetzee/72f537102ba58b075321.js"> </script>
+<script src="https://gist.github.com/sebcoetzee/72f537102ba58b075321.js"> </script>
 
 <p>The default behaviour for the ‘Cancel’ button is assumed and only the handler that will be called when the ‘OK’ button is clicked can be passed in.</p>
 
@@ -557,7 +557,7 @@ modals.registerModal(
         router.navigate(&quot;login&quot;, true);
     }
 );</pre></noscript>
-<script src="https://gist.github.com/SebastianCoetzee/f5391d44b98a20bd00ed.js"> </script>
+<script src="https://gist.github.com/sebcoetzee/f5391d44b98a20bd00ed.js"> </script>
 
 <p>The effect of this pattern is that it decouples the management of the display of modal popups from the state of the views themselves. The implementation of the modal’s markup is abstracted away into a couple of generic types of popups that can be called from the view by triggering the events that the modals are listening for.</p>
 
@@ -646,7 +646,7 @@ modals.registerModal(
           
           
           <li>
-            <a href="https://github.com/SebastianCoetzee" title="GitHub">
+            <a href="https://github.com/sebcoetzee" title="GitHub">
               <span class="fa-stack fa-lg">
                 <i class="fa fa-circle fa-stack-2x"></i>
                 <i class="fa fa-github fa-stack-1x fa-inverse"></i>
