@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+  <!-- Beautiful Jekyll | MIT license | Copyright Dean Attali 2016 -->
+  <head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>Configuration Languages: A Balance of Constraints</title>
+
+  <meta name="author" content="Sebastian Coetzee" />
+
+  
+
+  <link rel="alternate" type="application/rss+xml" title="Sebastian Coetzee - Software Engineer living in London." href="/feed.xml" />
+
+  
+    
+      <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.0/css/font-awesome.min.css" />
+    
+  
+
+  
+    
+      <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    
+      <link rel="stylesheet" href="/css/bootstrap-social.css" />
+    
+      <link rel="stylesheet" href="/css/main.css" />
+    
+  
+
+  
+    
+      <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+    
+      <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" />
+    
+  
+
+  
+
+  
+
+  
+
+    <!-- Facebook OpenGraph tags -->
+  
+
+  
+  <meta property="og:title" content="Configuration Languages: A Balance of Constraints" />
+  
+
+   
+  <meta property="og:description" content="Configuration is a topic that is often debated among software teams. It’s one of those issues that every engineer has an (often strong) opinion about and there isn’t a definitive right or wrong answer. Even something as basic as the method for passing config to an application can be tough...">
+  
+
+
+  <meta property="og:type" content="website" />
+
+  
+  <meta property="og:url" content="https://sebastiancoetzee.com/2022-12-11-configuration-languages-a-balance-of-constraints" />
+  <link rel="canonical" href="https://sebastiancoetzee.com/2022-12-11-configuration-languages-a-balance-of-constraints" />
+  
+
+  
+  <meta property="og:image" content="https://sebastiancoetzee.com/img/avatar-icon-3.jpeg" />
+  
+  
+
+  <!-- Twitter summary cards -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@SebCoetzee" />
+  <meta name="twitter:creator" content="@SebCoetzee" />
+
+  
+  <meta name="twitter:title" content="Configuration Languages: A Balance of Constraints" />
+  
+
+  
+  <meta name="twitter:description" content="Configuration is a topic that is often debated among software teams. It’s one of those issues that every engineer has an (often strong) opinion about and there isn’t a definitive right or wrong answer. Even something as basic as the method for passing config to an application can be tough...">
+  
+
+  
+  <meta name="twitter:image" content="https://sebastiancoetzee.com/img/avatar-icon-3.jpeg" />
+  
+
+</head>
+
+
+  <body>
+  
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="https://sebastiancoetzee.com">Sebastian Coetzee</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+          <li>
+            
+            
+
+
+
+
+
+<a href="/">Home</a>
+
+          </li>
+        
+        
+        
+          <li>
+            
+            
+
+
+
+
+
+<a href="/aboutme">About Me</a>
+
+          </li>
+        
+        
+      </ul>
+    </div>
+
+	
+	<div class="avatar-container">
+	  <div class="avatar-img-border">
+	    <a href="https://sebastiancoetzee.com ">
+	      <img class="avatar-img" src="/img/avatar-icon-3.jpeg" />
+		</a>
+	  </div>
+	</div>
+	
+
+  </div>
+</nav>
+
+
+    <!-- TODO this file has become a mess, refactor it -->
+
+
+
+
+
+<header class="header-section ">
+
+<div class="intro-header no-img">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <div class="post-heading">
+          <h1>Configuration Languages: A Balance of Constraints</h1>
+		  
+		  
+		  
+		  <span class="post-meta">Posted on December 11, 2022</span>
+		  
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</header>
+
+
+
+
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+
+      <article role="main" class="blog-post">
+        <p>Configuration is a topic that is often debated among software teams. It’s one of those issues that every engineer has an (often strong) opinion about and there isn’t a definitive right or wrong answer. Even something as basic as the method for passing config to an application can be tough to agree on.</p>
+
+<p>Some prefer command-line arguments, others environment variable, some swear by passing config as a JSON file to the application, and belive it or not there’s even one guy in my office who prefers XML. To illustrate the point, check out Microsoft’s documentation on <a href="https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-7.0">ASP.NET Core configuration</a>. It’s a “mere” 77-minute read according to Microsoft.</p>
+
+<p>Almost every organisation should be running multiple different instances of the same application, with different configurations. There could be any number of reasons for this. Here are some real-world examples:</p>
+
+<ul>
+  <li>Different environments: dev, test, stage, and/or prod.</li>
+  <li>Data importers might have multiple instances, each consuming from a different Kafka partition in the same Kafka cluster.</li>
+  <li>A trading system might implement the same strategy, but across different exchanges and/or instruments.</li>
+  <li>Some critical applications might have failover systems that use backup versions of some dependencies such as replicas of databases etc.</li>
+</ul>
+
+<p>These separate instances will often have slight differences in their configuration, with many commonalities. Regardless of the vector used to deliver the config to the application, engineers will have to define the config for each of these instances of the application. It is essential for a developer platform to have a tool in its toolchain that allows engineers to define these commonalities in the config between different instances, while still allowing specialisations for specific instances.</p>
+
+<p>Config management is an important layer of the developer platform. The most natural way to define config is to use some sort of language or markup format. Before discussing the implementation details of such a config management language it might be good to define the ideal attributes. Ideally, engineers should be able to define config in a language that is:</p>
+
+<ul>
+  <li><strong>Easy to understand</strong></li>
+  <li><strong>Expressive</strong></li>
+  <li><strong>Constrained</strong></li>
+  <li><strong>Statically checked</strong> (as much as possible)</li>
+  <li><strong>Versioned</strong></li>
+  <li><strong>Audited</strong></li>
+  <li><strong>Integrated</strong> with the deployment infrastructure</li>
+</ul>
+
+<p>I’ll start by presenting the view of <a href="https://matt-rickard.com/">Matt Rickard</a> who has an excellent blog that you should definitely check out. In a blog post titled <strong>Every Sufficiently Advanced Configuration Language is Wrong</strong> Matt <a href="https://matt-rickard.com/advanced-configuration-languages-are-wrong">argues</a> that:</p>
+
+<blockquote>
+  <p>For basic configuration, YAML or JSON is usually good enough. It falls apart when you try to do more:</p>
+
+  <ul>
+    <li>Template it with a templating engine</li>
+    <li>Use esoteric language features to reuse code (anchors and aliases)</li>
+    <li>Patch or modify it with something like JSONPatch</li>
+    <li>Type-check or schema validate</li>
+  </ul>
+</blockquote>
+
+<p>I agree with Matt’s assertion that for basic config we needn’t look further than JSON of YAML. I also agree that, when done wrong, templating and esoteric language features will be more of a bane than a boon.</p>
+
+<p>Matt then goes on to mention that these are anti-patterns, and that more advanced configuration languages have been developed (<a href="https://jsonnet.org/">Jsonnet</a>, <a href="https://cuelang.org/">CUE</a>, <a href="https://dhall-lang.org/">Dhall</a>) to solve these problems. On the trend of configuration languages becoming ever more advanced Matt says:</p>
+
+<blockquote>
+  <p>The logical extreme is becoming more evident – advanced configuration in general-purpose programming languages. You can see this in the emergence of Typescript for Infrastructure-as-Code. For the most basic (and human 0x777) configuration needs, there will always be simple formats – YAML, JSON, INI, etc.).</p>
+
+  <p>For everything else, general-purpose languages will win out.</p>
+</blockquote>
+
+<p>The steel man version of Matt’s argument boils down to: engineers are smart, and we should be giving engineers the most powerful and flexible tools possible. General-purpose languages like Python or TypeScript would allow engineers to use all the typical software development techniques to write maintainable, testable config.</p>
+
+<p>Unfortunately, in the absence of strict discipline, guidelines, and/or adherence to patterns the power of a general-purpose language could quickly lead to config that is unmaintainable. My objection isn’t so much with using a general-purpose language as it is with not having any constraints on how config is written.</p>
+
+<p>To help back up my point, I will refer to a great <a href="https://blog.janestreet.com/caveat-configurator-how-to-replace-configs-with-code-and-why-you-might-not-want-to/">talk</a> by Dominick LoBraico of Jane Street: <strong>Caveat Configurator: how to replace configs with code, and why you might not want to</strong>.</p>
+
+<p>In this talk, Dominick articulates the journey Jane Street took from having static configs in config files to the other extreme of having config written in OCaml and distributed along with the code of the applications themselves. Dominick mentions various trade-offs they had to make with regards to:</p>
+
+<ul>
+  <li><strong>Expressiveness</strong></li>
+  <li><strong>Versioning</strong></li>
+  <li><strong>Safety</strong></li>
+</ul>
+
+<p>Jane Street ended up finding a happy medium with what he calls a “config generation” step. I assume this config generation step involves evaluating all the configuration code and producing some sort of output (JSON or other) that can be versioned separately from the application code and the config source code.</p>
+
+<p>As an engineer in the Platform Engineering team at <a href="https://www.mavensecurities.com/">Maven Securities</a> I can say that I have been on much the same journey as Dominick. Over the last year I have been setting the vision and direction for Maven’s internal developer platform. In the process I’ve had to redesign a lot of the implementation of the config management and deployment infrastructure.</p>
+
+<p>Maven’s configuration management system is YAML-based. These YAML files are called specs. There are three different types of specs:</p>
+
+<ul>
+  <li><strong>Configspecs</strong>: libraries that can be shared between multiple applications or inherited from.</li>
+  <li><strong>Appspecs</strong>: map one-to-one with applications that are deployed within Maven’s infrastructure. In object-oriented terms, these would be classes.</li>
+  <li><strong>Deployspecs</strong>: contain the definitions of all the instances of applications. In object-oriented terms, these would be instantiations of the classes defined in the appspecs.</li>
+</ul>
+
+<p>Configspecs and Appspecs can declare:</p>
+
+<ul>
+  <li><strong>Variables declarations</strong>: type, data type, default definition.</li>
+  <li><strong>Plugin definitions</strong>: often some external systems need to be configured in order for the application to function properly (e.g. httpd config, systemd units, or crontab entries).</li>
+  <li><strong>Commands</strong>: command line string that gets run on start, or custom commands.</li>
+  <li><strong>Hooks</strong>: custom commands that are executed at certain points in the application lifecycle.</li>
+</ul>
+
+<p>Deployspecs can define:</p>
+
+<ul>
+  <li><strong>Instance</strong>: the name of a specific deployment. Must be unique.</li>
+  <li><strong>Variable definition overrides</strong>: allows specific definitions per instance.</li>
+  <li><strong>Environment</strong>: dev, test, stage, prod.</li>
+</ul>
+
+<p>Certain clearly defined fields (variables, commands, hooks, plugin definitions) can use Jinja templates to that can reference variables that are defined within the same scope or imported scopes. This allows engineers to share common config between related applications/instances. Engineers also have access to the power of Jinja’s templating engine with <a href="https://jinja.palletsprojects.com/en/3.0.x/nativetypes/">Native types</a> which allows returning Python types as the result of rendering Jinja templates. Jinja implements a subset of Python along with useful primitives for string manipulation such as filters.</p>
+
+<p>All specs are stored and versioned in a central git repository. This versions the source of config and enforces the regular software development best practices of pull requests and code reviews.</p>
+
+<p>As a simple, somewhat contrived example we could have one application that consumes some data feed of trades and publishes it to a Kafka topic. We could then also have a consumer that reads from that same Kafka topic. Ignoring the complexities around Kafka partitioning, we could define the config for these fictional applications as follows:</p>
+
+<p>The Kafka configuration can be shared between instances. We place this in its own configspec.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1"># kafka.configspec.yml</span>
+
+<span class="s">variables</span><span class="pi">:</span>
+    <span class="s">bootstrap_servers</span><span class="pi">:</span>
+        <span class="s">type</span><span class="pi">:</span> <span class="s">static</span>
+        <span class="s">data_type</span><span class="pi">:</span> <span class="s">string</span>
+
+<span class="s">instances</span><span class="pi">:</span>
+    <span class="s">dev</span><span class="pi">:</span>
+        <span class="s">bootstrap_servers</span><span class="pi">:</span> <span class="s">kafkadev3,kafkadev4,kafkadev5</span>
+    <span class="s">prod</span><span class="pi">:</span>
+        <span class="s">bootstrap_servers</span><span class="pi">:</span> <span class="s">kafkaprod11,kafkaprod12,kafkaprod13</span>
+</code></pre>
+</div>
+
+<p>Notice how we’ve defined a set of Kafka bootstrap server hostnames per environment.</p>
+
+<p>The producer should have its own appspec:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1"># producer.appspec.yml</span>
+
+<span class="s">import</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s">name</span><span class="pi">:</span> <span class="s">kafka</span>
+      <span class="s">instance</span><span class="pi">:</span> <span class="s1">'</span><span class="s">{{</span><span class="nv"> </span><span class="s">environment</span><span class="nv"> </span><span class="s">}}'</span>
+    <span class="pi">-</span> <span class="s">name</span><span class="pi">:</span> <span class="s">resource</span>
+
+<span class="s">variables</span><span class="pi">:</span>
+    <span class="s">telemetry_port</span><span class="pi">:</span>
+        <span class="s">type</span><span class="pi">:</span> <span class="s">runtime</span>
+        <span class="s">data_type</span><span class="pi">:</span> <span class="s">integer</span>
+        <span class="s">default</span><span class="pi">:</span> <span class="s1">'</span><span class="s">{{</span><span class="nv"> </span><span class="s">resource.tcp_port()</span><span class="nv"> </span><span class="s">}}'</span>
+    <span class="s">trading_instrument</span><span class="pi">:</span>
+        <span class="s">type</span><span class="pi">:</span> <span class="s">static</span>
+        <span class="s">data_type</span><span class="pi">:</span> <span class="s">string</span>
+
+<span class="s">commands</span><span class="pi">:</span>
+    <span class="s">start</span><span class="pi">:</span> <span class="pi">&gt;</span>
+        <span class="no">bin/producer</span>
+            <span class="no">--bootstrap-servers {{ kafka.bootstrap_servers }}</span>
+            <span class="no">--kafka-topic trades-{{ trading_instrument }}</span>
+            <span class="no">--telemetry-port {{ telemetry_port }}</span>
+            <span class="no">--trading-instrument {{ trading_instrument }}</span>
+</code></pre>
+</div>
+
+<p>The <code class="highlighter-rouge">telemetry_port</code> is a <code class="highlighter-rouge">runtime</code> variable. This means that the value of the variable is not known until the application commands are run. In this specific case, we are allocating a telemetry port for the application dynamically from a pool of reserved ports. Care is taken to ensure that runtime variables cannot be referenced from a static context. Static variables should be resolvable at config generation. The goal is to make as many of the variables static as possible. Static variables offer advantages over runtime variables: they can be statically checked at config generation. Config generation is triggered by a webhook on the version control system. This allows developers to catch classes of errors at code review as opposed to the first time an application is started up in production.</p>
+
+<p>The <code class="highlighter-rouge">trading_instrument</code> is a declared variable that has no default definition. This means that it will have to be overridden in the deployspec.</p>
+
+<p>The consumer should also have its own appspec:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1"># consumer.appspec.yml</span>
+
+<span class="s">import</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s">name</span><span class="pi">:</span> <span class="s">kafka</span>
+      <span class="s">instance</span><span class="pi">:</span> <span class="s1">'</span><span class="s">{{</span><span class="nv"> </span><span class="s">environment</span><span class="nv"> </span><span class="s">}}'</span>
+
+<span class="s">variables</span><span class="pi">:</span>
+    <span class="s">trading_instrument</span><span class="pi">:</span>
+        <span class="s">type</span><span class="pi">:</span> <span class="s">static</span>
+        <span class="s">data_type</span><span class="pi">:</span> <span class="s">string</span>
+
+<span class="s">commands</span><span class="pi">:</span>
+    <span class="s">start</span><span class="pi">:</span> <span class="pi">&gt;</span>
+        <span class="no">bin/consumer</span>
+            <span class="no">--bootstrap-servers {{ kafka.bootstrap_servers }}</span>
+            <span class="no">--kafka-topic trades-{{ trading_instrument }}</span>
+            <span class="no">--trading-instrument {{ trading_instrument }}</span>
+</code></pre>
+</div>
+
+<p>The consumer can import the same Kafka config as the producer. This means we have no duplicate definition of the Kafka <code class="highlighter-rouge">bootstrap_servers</code>.</p>
+
+<p>The deployspecs define the instances of the producer and consumer:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1"># producer.deployspec.yml</span>
+
+<span class="s">application</span><span class="pi">:</span> <span class="s">producer</span>
+<span class="s">deployments</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s">instance</span><span class="pi">:</span> <span class="s">default</span>
+      <span class="s">environment</span><span class="pi">:</span> <span class="s">dev</span>
+      <span class="s">overrides</span><span class="pi">:</span>
+        <span class="s">trading_instrument</span><span class="pi">:</span> <span class="s">DUMMY</span>
+    
+    <span class="pi">-</span> <span class="s">instance</span><span class="pi">:</span> <span class="s">SPX</span>
+      <span class="s">environment</span><span class="pi">:</span> <span class="s">prod</span>
+      <span class="s">overrides</span><span class="pi">:</span>
+          <span class="s">trading_instrument</span><span class="pi">:</span> <span class="s">SPX</span>
+    <span class="pi">-</span> <span class="s">instance</span><span class="pi">:</span> <span class="s">DAX</span>
+      <span class="s">environment</span><span class="pi">:</span> <span class="s">prod</span>
+      <span class="s">overrides</span><span class="pi">:</span>
+          <span class="s">trading_instrument</span><span class="pi">:</span> <span class="s">DAX</span>
+</code></pre>
+</div>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1"># consumer.deployspec.yml</span>
+
+<span class="s">application</span><span class="pi">:</span> <span class="s">consumer</span>
+<span class="s">deployments</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s">instance</span><span class="pi">:</span> <span class="s">default</span>
+      <span class="s">environment</span><span class="pi">:</span> <span class="s">dev</span>
+      <span class="s">overrides</span><span class="pi">:</span>
+        <span class="s">trading_instrument</span><span class="pi">:</span> <span class="s">DUMMY</span>
+    
+    <span class="pi">-</span> <span class="s">instance</span><span class="pi">:</span> <span class="s">SPX</span>
+      <span class="s">environment</span><span class="pi">:</span> <span class="s">prod</span>
+      <span class="s">overrides</span><span class="pi">:</span>
+          <span class="s">trading_instrument</span><span class="pi">:</span> <span class="s">SPX</span>
+    <span class="pi">-</span> <span class="s">instance</span><span class="pi">:</span> <span class="s">DAX</span>
+      <span class="s">environment</span><span class="pi">:</span> <span class="s">prod</span>
+      <span class="s">overrides</span><span class="pi">:</span>
+          <span class="s">trading_instrument</span><span class="pi">:</span> <span class="s">DAX</span>
+</code></pre>
+</div>
+
+<p>These specs for our fictional applications would be committed to the central git repository containing all the specs. Once merged to master, the config generation CI step would produce new versions of JSON configurations for these applications in a standardised format that is understood by the deployment system. This JSON config is versioned and the engineer is able to deploy the new version of the config for that application or revert to an older version of the config by simply selecting which version of the config to deploy from a dropdown.</p>
+
+<p>At this point it might be useful to check back with the ideal attributes we defined for our configuration management tooling:</p>
+
+<p><strong>Easy to understand</strong>: I’m biased, but I think the DSL is relatively easy to understand and use. There are only a handful of concepts, the rules are clearly defined, and it’s unlikely that engineers will write unmaintanable config in such a simple DSL.</p>
+
+<p><strong>Expressive</strong>: This DSL is not as expressive as a general-purpose programming language, but it still leaves a decent amount of the design decisions of how to structure the config up to the engineer. Variable definitions can be referenced from other variable definitions, namespaces can be imported into other namespaces, and the developer has access to the Jinja templating engine which implements a subset of Python.</p>
+
+<p><strong>Constrained</strong>: The DSL tries to be the happy medium between the extremes of a general-purpose language with no framework and the other extreme of a rigid structure that needs development effort at the framework-layer to support new types of configuration. The constraints that are enforced help reduce complexity and reduces the chances of config becoming unmaintainable.</p>
+
+<p><strong>Statically checked</strong>: The static parts of the config are evaluated at config generation time. This provides a safety net to engineers that allows them to find issues like syntax errors, references to undefined variables, runtime variables referenced from a static context, circular dependencies, and invalid YAML before they even merge their PRs.</p>
+
+<p><strong>Versioned</strong>: Both the config source and the outputs of config generation are versioned.</p>
+
+<p><strong>Audited</strong>: The deployment infrastructure keeps track of which versions of the config are deployed to which instances. Changes are easily diffable via the deployer’s UI, so engineers are always aware of what changes they are deploying.</p>
+
+<p><strong>Integrated</strong>: Engineers will happily use tools if it can save them manual work and time. By having the config management fully integrated with the rest of the developer platform we can automate steps that developers need to take to comply with the software development lifecycle policy. This includes automatically generating change control requests from the config changes which can be submitted for review, automating the deployment process, allowing easy rollbacks, integrating with alerting and monitoring systems etc.</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>The key to good configuration management is to find the right balance between expressiveness and constraints. Engineers should be given a language that is powerful enough to adequately model the config of their application. However, by adding some sensible constraints to a configuration language, we can make configuration more maintainable, versioned, audited, integrated, and easier to understand.</p>
+
+      </article>
+
+      
+
+      
+        <!-- Check if any share-links are active -->
+
+
+
+
+<section id = "social-share-section">
+
+  <!--- Share on Twitter -->
+  
+    <a href="https://twitter.com/intent/tweet?text=Configuration+Languages%3A+A+Balance+of+Constraints+https://sebastiancoetzee.com/2022-12-11-configuration-languages-a-balance-of-constraints"
+      class="btn btn-social-icon btn-twitter" title="Share on Twitter">
+      <span class="fa fa-fw fa-twitter" aria-hidden="true"></span>
+    </a>
+  
+
+  <!--- Share on Facebook -->
+  
+    <a href="https://www.facebook.com/sharer/sharer.php?u=https://sebastiancoetzee.com/2022-12-11-configuration-languages-a-balance-of-constraints"
+      class="btn btn-social-icon btn-facebook" title="Share on Facebook">
+      <span class="fa fa-fw fa-facebook" aria-hidden="true"></span>
+    </a>
+  
+
+  <!--- Share on Google Plus -->
+  
+
+  <!--- Share on LinkedIn -->
+  
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://sebastiancoetzee.com/2022-12-11-configuration-languages-a-balance-of-constraints"
+      class="btn btn-social-icon btn-linkedin" title="Share on LinkedIn">
+      <span class="fa fa-fw fa-linkedin" aria-hidden="true"></span>
+    </a>
+  
+
+</section>
+
+
+
+      
+
+      <ul class="pager blog-pager">
+        
+        <li class="previous">
+          <a href="/2019-04-01-testing-go-web-services-with-interfaces-and-mocks" data-toggle="tooltip" data-placement="top" title="Testing Go web services using interfaces and mocks">&larr; Previous Post</a>
+        </li>
+        
+        
+      </ul>
+
+      
+        <div class="disqus-comments">
+          
+
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+    <footer>
+  <div class="container beautiful-jekyll-footer">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+          <li>
+            <a href="https://www.facebook.com/sebastian.coetzee" title="Facebook">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+          
+          <li>
+            <a href="https://github.com/sebcoetzee" title="GitHub">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+		  
+          <li>
+            <a href="https://twitter.com/SebCoetzee" title="Twitter">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+	  
+      
+		  
+          <li>
+            <a href="mailto:mail@sebastiancoetzee.com" title="Email me">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+		  
+          <li>
+            <a href="https://linkedin.com/in/in/sebastiancoetzee" title="LinkedIn">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+		  
+		  
+          <li>
+            <a href="https://stackoverflow.com/users/2694045/sebastian-coetzee" title="StackOverflow">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+      
+      
+      
+      
+		  
+        </ul>
+        <p class="copyright text-muted">
+		  Sebastian Coetzee
+		  &nbsp;&bull;&nbsp;
+		  2022
+
+		  
+		  &nbsp;&bull;&nbsp;
+		  <a href="https://sebastiancoetzee.com">SebastianCoetzee.com</a>
+		  
+	    </p>
+	        <!-- Please don't remove this, keep my open source work credited :) -->
+		<p class="theme-by text-muted">
+		  Theme by
+		  <a href="http://deanattali.com/beautiful-jekyll/">beautiful-jekyll</a>
+		</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  
+    
+
+
+
+
+
+
+  
+    <!-- doing something a bit funky here because I want to be careful not to include JQuery twice! -->
+    
+      <script>
+      	if (typeof jQuery == 'undefined') {
+      	  document.write('<script src="/js/jquery-1.11.2.min.js"></scr' + 'ipt>');
+      	}
+      </script>
+    
+  
+    <!-- doing something a bit funky here because I want to be careful not to include JQuery twice! -->
+    
+	<script src="/js/bootstrap.min.js"></script>
+    
+  
+    <!-- doing something a bit funky here because I want to be careful not to include JQuery twice! -->
+    
+	<script src="/js/main.js"></script>
+    
+  
+
+
+
+	<!-- Google Analytics -->
+	<script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+		ga('create', 'UA-28366174-2', 'auto');
+		ga('send', 'pageview');
+	</script>
+	<!-- End Google Analytics -->
+
+
+  
+  </body>
+</html>

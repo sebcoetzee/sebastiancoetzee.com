@@ -1,13 +1,13 @@
 ---
 layout: post
-title: 'Configuration Languages: Are Constaints Good?'
+title: 'Configuration Languages: A Balance of Constraints'
 ---
 
-Configuration is a topic that is often debated among software teams. It's one of those things that every engineer has an (often strong) opinion about and there isn't a definitive right or wrong answer. Even something as basic as the method for passing config to an application can lead to many differnt opinions.
+Configuration is a topic that is often debated among software teams. It's one of those issues that every engineer has an (often strong) opinion about and there isn't a definitive right or wrong answer. Even something as basic as the method for passing config to an application can be tough to agree on.
 
-Some prefer command-line arguments, others environment variable, some swear by passing config as a JSON file to the application, and belive it or not there's even one guy in my office who prefers XML. To illustrate my point, check out Microsoft's documentation on [ASP.NET Core configuration](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-7.0). It's a "mere" 77-minute read according to Microsoft.
+Some prefer command-line arguments, others environment variable, some swear by passing config as a JSON file to the application, and belive it or not there's even one guy in my office who prefers XML. To illustrate the point, check out Microsoft's documentation on [ASP.NET Core configuration](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-7.0). It's a "mere" 77-minute read according to Microsoft.
 
-Almost every organisation should be running multiple different instances of the same application. There could be any number of reasons for this. Here are some real-world examples:
+Almost every organisation should be running multiple different instances of the same application, with different configurations. There could be any number of reasons for this. Here are some real-world examples:
 
 - Different environments: dev, test, stage, and/or prod.
 - Data importers might have multiple instances, each consuming from a different Kafka partition in the same Kafka cluster.
@@ -16,7 +16,7 @@ Almost every organisation should be running multiple different instances of the 
 
 These separate instances will often have slight differences in their configuration, with many commonalities. Regardless of the vector used to deliver the config to the application, engineers will have to define the config for each of these instances of the application. It is essential for a developer platform to have a tool in its toolchain that allows engineers to define these commonalities in the config between different instances, while still allowing specialisations for specific instances.
 
-Before discussing the implementation details of such a config management tool it might be good to define the ideal attributes of this layer of the developer platform. Ideally, engineers should be able to define config in a way that is:
+Config management is an important layer of the developer platform. The most natural way to define config is to use some sort of language or markup format. Before discussing the implementation details of such a config management language it might be good to define the ideal attributes. Ideally, engineers should be able to define config in a language that is:
 
 - **Easy to understand**
 - **Expressive**
@@ -26,7 +26,7 @@ Before discussing the implementation details of such a config management tool it
 - **Audited**
 - **Integrated** with the deployment infrastructure
 
-In terms of implementation options, I'll start by presenting the view of [Matt Rickard](https://matt-rickard.com/) who has an excellent blog that you should definitely check out. In a blog post titled **Every Sufficiently Advanced Configuration Language is Wrong** Matt [argues](https://matt-rickard.com/advanced-configuration-languages-are-wrong) that:
+I'll start by presenting the view of [Matt Rickard](https://matt-rickard.com/) who has an excellent blog that you should definitely check out. In a blog post titled **Every Sufficiently Advanced Configuration Language is Wrong** Matt [argues](https://matt-rickard.com/advanced-configuration-languages-are-wrong) that:
 
 > For basic configuration, YAML or JSON is usually good enough. It falls apart when you try to do more:
 >
@@ -35,27 +35,27 @@ In terms of implementation options, I'll start by presenting the view of [Matt R
 > - Patch or modify it with something like JSONPatch
 > - Type-check or schema validate
 
-I agree that his assertion that for basic config we needn't look further than JSON of YAML. I also agree that, when done wrong, templating and esoteric language features will be more of a burden than a boon.
+I agree with Matt's assertion that for basic config we needn't look further than JSON of YAML. I also agree that, when done wrong, templating and esoteric language features will be more of a bane than a boon.
 
-Matt then goes on to mention that these are anti-patterns (when done wrong, I agree), and that more advanced configuration languages have been developed (Jsonnet, CUE, Dhall) to solve these problems. On the trend of configuration languages becoming ever more advanced he says:
+Matt then goes on to mention that these are anti-patterns, and that more advanced configuration languages have been developed ([Jsonnet](https://jsonnet.org/), [CUE](https://cuelang.org/), [Dhall](https://dhall-lang.org/)) to solve these problems. On the trend of configuration languages becoming ever more advanced Matt says:
 
 > The logical extreme is becoming more evident – advanced configuration in general-purpose programming languages. You can see this in the emergence of Typescript for Infrastructure-as-Code. For the most basic (and human 0x777) configuration needs, there will always be simple formats – YAML, JSON, INI, etc.).
 >
 > For everything else, general-purpose languages will win out.
 
-If I were to steel man Matt's argument I would say that engineers are smart, and we should be giving engineers the most powerful and flexible tools possible to solve their problems with. General-purpose languages like Python or TypeScript would allow engineers to use all the typical software development techniques to write maintainable, testable config.
+The steel man version of Matt's argument boils down to: engineers are smart, and we should be giving engineers the most powerful and flexible tools possible. General-purpose languages like Python or TypeScript would allow engineers to use all the typical software development techniques to write maintainable, testable config.
 
-Unfortunately I think that without strict discipline, guidelines, and/or adherence to patterns, the power of a general-purpose language could quickly lead to config that is an unmaintainable spaghetti mess. I suppose my objection isn't so much with the general-purpose language as it is to not having any constraints on how config is written.
+Unfortunately, in the absence of strict discipline, guidelines, and/or adherence to patterns the power of a general-purpose language could quickly lead to config that is unmaintainable. My objection isn't so much with using a general-purpose language as it is with not having any constraints on how config is written.
 
-To help back up my point, I will refer to a brilliant [talk](https://blog.janestreet.com/caveat-configurator-how-to-replace-configs-with-code-and-why-you-might-not-want-to/) by Dominick LoBraico of Jane Street: **Caveat Configurator: how to replace configs with code, and why you might not want to**.
+To help back up my point, I will refer to a great [talk](https://blog.janestreet.com/caveat-configurator-how-to-replace-configs-with-code-and-why-you-might-not-want-to/) by Dominick LoBraico of Jane Street: **Caveat Configurator: how to replace configs with code, and why you might not want to**.
 
-In this talk, Dominick talks about the journey Jane Street took from having static configs in config files to the other extreme of having config written in OCaml and distributed along with the code of the applications themselves. Dominick mentions various trade-offs they had to make with regards to:
+In this talk, Dominick articulates the journey Jane Street took from having static configs in config files to the other extreme of having config written in OCaml and distributed along with the code of the applications themselves. Dominick mentions various trade-offs they had to make with regards to:
 
 - **Expressiveness**
 - **Versioning**
 - **Safety**
 
-They eventually ended up finding a happy medium with what he calls a "config generation" step. I assume that this config generation step involves executing all the configuration code and producing some sort of output (JSON or other) that can be versioned separately from the application code.
+Jane Street ended up finding a happy medium with what he calls a "config generation" step. I assume this config generation step involves evaluating all the configuration code and producing some sort of output (JSON or other) that can be versioned separately from the application code and the config source code.
 
 As an engineer in the Platform Engineering team at [Maven Securities](https://www.mavensecurities.com/) I can say that I have been on much the same journey as Dominick. Over the last year I have been setting the vision and direction for Maven's internal developer platform. In the process I've had to redesign a lot of the implementation of the config management and deployment infrastructure.
 
@@ -68,17 +68,17 @@ Maven's configuration management system is YAML-based. These YAML files are call
 Configspecs and Appspecs can declare:
 
 - **Variables declarations**: type, data type, default definition.
-- **Plugin definitions**: Often some external systems need to be configured in order for the application to function properly (e.g. httpd config, systemd units, or crontab entries)
+- **Plugin definitions**: often some external systems need to be configured in order for the application to function properly (e.g. httpd config, systemd units, or crontab entries).
 - **Commands**: command line string that gets run on start, or custom commands.
-- **Hooks**: custom commands that are executed as certain points in the application lifecycle.
+- **Hooks**: custom commands that are executed at certain points in the application lifecycle.
 
 Deployspecs can define:
 
-- **Instance**: must be unique
-- **Variable definition overrides**: allows specific definitions per instance
-- **Environment**: dev, test, stage, prod
+- **Instance**: the name of a specific deployment. Must be unique.
+- **Variable definition overrides**: allows specific definitions per instance.
+- **Environment**: dev, test, stage, prod.
 
-Certain clearly defined fields (variables, commands, hooks, plugin definitions) can use Jinja templates to that can reference variables that are defined within the same scope or imported scopes. This allows engineers to share common config between related applications/instances. Engineers also have access to the power of Jinja's templating engine with [Native types](https://jinja.palletsprojects.com/en/3.0.x/nativetypes/) which implements a subset of Python along with very handy primitives for string manipulation such as filters.
+Certain clearly defined fields (variables, commands, hooks, plugin definitions) can use Jinja templates to that can reference variables that are defined within the same scope or imported scopes. This allows engineers to share common config between related applications/instances. Engineers also have access to the power of Jinja's templating engine with [Native types](https://jinja.palletsprojects.com/en/3.0.x/nativetypes/) which allows returning Python types as the result of rendering Jinja templates. Jinja implements a subset of Python along with useful primitives for string manipulation such as filters.
 
 All specs are stored and versioned in a central git repository. This versions the source of config and enforces the regular software development best practices of pull requests and code reviews.
 
@@ -131,7 +131,7 @@ commands:
             --trading-instrument {% raw %}{{ trading_instrument }}{% endraw %}
 ```
 
-The `telemetry_port` is a `runtime` variable. This means that the value of the variable is not known until the application commands are run. In this specific case, we are allocating a telemetry port for the application dynamically from a pool of reserved ports. Care is taken to ensure that runtime variables cannot be referenced from a static context. Static variables should be resolvable at config generation. The goal is to make as many of the variables static as possible. Static variables offer advantages over runtime variables in that they can be statically checked at config generation. Config generation is triggered by a webhook on the version control system. This allows developers to catch classes of errors at code review as opposed to the first time an application is started up in production.
+The `telemetry_port` is a `runtime` variable. This means that the value of the variable is not known until the application commands are run. In this specific case, we are allocating a telemetry port for the application dynamically from a pool of reserved ports. Care is taken to ensure that runtime variables cannot be referenced from a static context. Static variables should be resolvable at config generation. The goal is to make as many of the variables static as possible. Static variables offer advantages over runtime variables: they can be statically checked at config generation. Config generation is triggered by a webhook on the version control system. This allows developers to catch classes of errors at code review as opposed to the first time an application is started up in production.
 
 The `trading_instrument` is a declared variable that has no default definition. This means that it will have to be overridden in the deployspec.
 
@@ -205,11 +205,11 @@ These specs for our fictional applications would be committed to the central git
 
 At this point it might be useful to check back with the ideal attributes we defined for our configuration management tooling:
 
-**Easy to understand**: I'm biased, but I think the DSL is relatively easy to understand and use. There are only a handful of concepts, the rules are clearly defined, and it's unlikely that engineers with implement config using the DSL in such a way that it would be difficult to read and follow.
+**Easy to understand**: I'm biased, but I think the DSL is relatively easy to understand and use. There are only a handful of concepts, the rules are clearly defined, and it's unlikely that engineers will write unmaintanable config in such a simple DSL.
 
-**Expressive**: This DSL is not as expressive as a general-purpose programming language, but it still leaves a decent amount of the design decisions of how to structure the config up to the engineer. Variables definitions can be referenced from other variable definitions, namespaces can be imported into other namespaces, and the developer has access to the Jinja templating engine which is basically a subset of Python.
+**Expressive**: This DSL is not as expressive as a general-purpose programming language, but it still leaves a decent amount of the design decisions of how to structure the config up to the engineer. Variable definitions can be referenced from other variable definitions, namespaces can be imported into other namespaces, and the developer has access to the Jinja templating engine which implements a subset of Python.
 
-**Constrained**: The DSL tries to find that happy medium between the extremes of having no rules (general-purpose language with no framework) and having an extremely rigid structure that would need development effort to support new types of configuration. The constraints that are enforced help reduce complexity and reduces the chances of config becoming unmaintainable.
+**Constrained**: The DSL tries to be the happy medium between the extremes of a general-purpose language with no framework and the other extreme of a rigid structure that needs development effort at the framework-layer to support new types of configuration. The constraints that are enforced help reduce complexity and reduces the chances of config becoming unmaintainable.
 
 **Statically checked**: The static parts of the config are evaluated at config generation time. This provides a safety net to engineers that allows them to find issues like syntax errors, references to undefined variables, runtime variables referenced from a static context, circular dependencies, and invalid YAML before they even merge their PRs.
 
@@ -221,13 +221,4 @@ At this point it might be useful to check back with the ideal attributes we defi
 
 ## Conclusion
 
-If there is any conclusion that should be drawn from this I think it should be: the key to good configuration management is to find the right balance between expressiveness and constraints. Engineers should be given a language that is powerful enough to adequately model the config structure of their application. However, by adding some sensible constraints to a configuration language, we can make configuration more maintainable, versioned, audited, integrated, and easier to understand.
-
-
-
-
-
-
-
-
-
+The key to good configuration management is to find the right balance between expressiveness and constraints. Engineers should be given a language that is powerful enough to adequately model the config of their application. However, by adding some sensible constraints to a configuration language, we can make configuration more maintainable, versioned, audited, integrated, and easier to understand.

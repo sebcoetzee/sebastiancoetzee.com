@@ -7,6 +7,17 @@
     <atom:link href="https://sebastiancoetzee.com/feed.xml" rel="self" type="application/rss+xml" />
     
       <item>
+        <title>Configuration Languages: A Balance of Constraints</title>
+        <description>
+          
+          Configuration is a topic that is often debated among software teams. It’s one of those issues that every engineer has an (often strong) opinion about and there isn’t a definitive right or wrong answer. Even something as basic as the method for passing config to an application can be tough...
+        </description>
+        <pubDate>Sun, 11 Dec 2022 00:00:00 +0200</pubDate>
+        <link>https://sebastiancoetzee.com/2022-12-11-configuration-languages-a-balance-of-constraints</link>
+        <guid isPermaLink="true">https://sebastiancoetzee.com/2022-12-11-configuration-languages-a-balance-of-constraints</guid>
+      </item>
+    
+      <item>
         <title>Testing Go web services using interfaces and mocks</title>
         <description>
           
