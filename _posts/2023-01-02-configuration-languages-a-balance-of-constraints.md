@@ -84,7 +84,7 @@ All config YAMLs are stored and versioned in a central git repository. This vers
 
 As a simple, somewhat contrived example we could have one application that consumes some data feed of trades and publishes it to a Kafka topic. We could then also have a consumer that reads from the same Kafka topic. Ignoring the complexities around Kafka partitioning, we could define the config for these fictional applications as follows:
 
-The Kafka configuration can be shared between instances. We place this in its own configspec.
+The Kafka configuration can be shared between instances. We place this in its own library config.
 
 ```yaml
 # kafka.library.yml
@@ -175,6 +175,7 @@ deployments:
     environment: prod
     overrides:
       trading_instrument: SPX
+
   - instance: DAX
     environment: prod
     overrides:
@@ -195,6 +196,7 @@ deployments:
     environment: prod
     overrides:
         trading_instrument: SPX
+
   - instance: DAX
     environment: prod
     overrides:

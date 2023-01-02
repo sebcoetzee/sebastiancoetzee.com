@@ -37,11 +37,11 @@ avatar: "/img/avatar-icon-3.jpeg"
 author:
   name: Sebastian Coetzee
   email: "mail@sebastiancoetzee.com"
-  facebook: sebastian.coetzee  # eg. daattali
+  # facebook: sebastian.coetzee  # eg. daattali
   github: sebcoetzee    # eg. daattali
   twitter: SebCoetzee   # eg. daattali
   linkedin: in/sebastiancoetzee  # eg. "pub/dean-attali/8/946/143"
-  stackoverflow: 2694045/sebastian-coetzee  # eg. "3943160/daattali"
+  # stackoverflow: 2694045/sebastian-coetzee  # eg. "3943160/daattali"
 
 # Select which links to show in the footer
 footer-links-active:
@@ -96,7 +96,7 @@ defaults:
     values:
       layout: "post"
       comments: true  # add comments to all blog posts
-      social-share: true # add social media sharing buttons to all blog posts
+      social-share: false # add social media sharing buttons to all blog posts
   -
     scope:
       path: "" # all files

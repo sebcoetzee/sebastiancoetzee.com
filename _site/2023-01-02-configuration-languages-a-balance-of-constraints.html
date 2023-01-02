@@ -283,7 +283,7 @@
 
 <p>As a simple, somewhat contrived example we could have one application that consumes some data feed of trades and publishes it to a Kafka topic. We could then also have a consumer that reads from the same Kafka topic. Ignoring the complexities around Kafka partitioning, we could define the config for these fictional applications as follows:</p>
 
-<p>The Kafka configuration can be shared between instances. We place this in its own configspec.</p>
+<p>The Kafka configuration can be shared between instances. We place this in its own library config.</p>
 
 <div class="highlighter-rouge"><pre class="highlight"><code><span class="c1"># kafka.library.yml</span>
 
@@ -373,6 +373,7 @@
     <span class="s">environment</span><span class="pi">:</span> <span class="s">prod</span>
     <span class="s">overrides</span><span class="pi">:</span>
       <span class="s">trading_instrument</span><span class="pi">:</span> <span class="s">SPX</span>
+
   <span class="pi">-</span> <span class="s">instance</span><span class="pi">:</span> <span class="s">DAX</span>
     <span class="s">environment</span><span class="pi">:</span> <span class="s">prod</span>
     <span class="s">overrides</span><span class="pi">:</span>
@@ -393,6 +394,7 @@
     <span class="s">environment</span><span class="pi">:</span> <span class="s">prod</span>
     <span class="s">overrides</span><span class="pi">:</span>
         <span class="s">trading_instrument</span><span class="pi">:</span> <span class="s">SPX</span>
+
   <span class="pi">-</span> <span class="s">instance</span><span class="pi">:</span> <span class="s">DAX</span>
     <span class="s">environment</span><span class="pi">:</span> <span class="s">prod</span>
     <span class="s">overrides</span><span class="pi">:</span>
@@ -427,45 +429,6 @@
       
 
       
-        <!-- Check if any share-links are active -->
-
-
-
-
-<section id = "social-share-section">
-
-  <!--- Share on Twitter -->
-  
-    <a href="https://twitter.com/intent/tweet?text=Configuration+Languages%3A+A+Balance+of+Constraints+https://sebastiancoetzee.com/2023-01-02-configuration-languages-a-balance-of-constraints"
-      class="btn btn-social-icon btn-twitter" title="Share on Twitter">
-      <span class="fa fa-fw fa-twitter" aria-hidden="true"></span>
-    </a>
-  
-
-  <!--- Share on Facebook -->
-  
-    <a href="https://www.facebook.com/sharer/sharer.php?u=https://sebastiancoetzee.com/2023-01-02-configuration-languages-a-balance-of-constraints"
-      class="btn btn-social-icon btn-facebook" title="Share on Facebook">
-      <span class="fa fa-fw fa-facebook" aria-hidden="true"></span>
-    </a>
-  
-
-  <!--- Share on Google Plus -->
-  
-
-  <!--- Share on LinkedIn -->
-  
-    <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://sebastiancoetzee.com/2023-01-02-configuration-languages-a-balance-of-constraints"
-      class="btn btn-social-icon btn-linkedin" title="Share on LinkedIn">
-      <span class="fa fa-fw fa-linkedin" aria-hidden="true"></span>
-    </a>
-  
-
-</section>
-
-
-
-      
 
       <ul class="pager blog-pager">
         
@@ -491,15 +454,6 @@
     <div class="row">
       <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
         <ul class="list-inline text-center footer-links">
-          
-          <li>
-            <a href="https://www.facebook.com/sebastian.coetzee" title="Facebook">
-              <span class="fa-stack fa-lg">
-                <i class="fa fa-circle fa-stack-2x"></i>
-                <i class="fa fa-facebook fa-stack-1x fa-inverse"></i>
-              </span>
-            </a>
-          </li>
           
           
           <li>
@@ -545,15 +499,6 @@
           
 		  
 		  
-          <li>
-            <a href="https://stackoverflow.com/users/2694045/sebastian-coetzee" title="StackOverflow">
-              <span class="fa-stack fa-lg">
-                <i class="fa fa-circle fa-stack-2x"></i>
-                <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
-              </span>
-            </a>
-          </li>
-          
       
       
       
