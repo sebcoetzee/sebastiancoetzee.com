@@ -59,8 +59,8 @@
   <meta property="og:type" content="website" />
 
   
-  <meta property="og:url" content="https://sebastiancoetzee.com/2022-12-11-configuration-languages-a-balance-of-constraints" />
-  <link rel="canonical" href="https://sebastiancoetzee.com/2022-12-11-configuration-languages-a-balance-of-constraints" />
+  <meta property="og:url" content="https://sebastiancoetzee.com/2023-01-02-configuration-languages-a-balance-of-constraints" />
+  <link rel="canonical" href="https://sebastiancoetzee.com/2023-01-02-configuration-languages-a-balance-of-constraints" />
   
 
   
@@ -167,7 +167,7 @@
 		  
 		  
 		  
-		  <span class="post-meta">Posted on December 11, 2022</span>
+		  <span class="post-meta">Posted on January 2, 2023</span>
 		  
         </div>
       </div>
@@ -186,7 +186,7 @@
       <article role="main" class="blog-post">
         <p>Configuration is a topic that is often debated among software teams. It’s one of those issues that every engineer has an (often strong) opinion about and there isn’t a definitive right or wrong answer. Even something as basic as the method for passing config to an application can be tough to agree on.</p>
 
-<p>Some prefer command-line arguments, others environment variable, some swear by passing config as a JSON file to the application, and belive it or not there’s even one guy in my office who prefers XML. To illustrate the point, check out Microsoft’s documentation on <a href="https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-7.0">ASP.NET Core configuration</a>. It’s a “mere” 77-minute read according to Microsoft.</p>
+<p>Some prefer command-line arguments, others environment variables, some swear by passing config as a JSON file to the application, and believe it or not there’s even one guy in my office who prefers XML. To illustrate the point, check out Microsoft’s documentation on <a href="https://learn.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-7.0">ASP.NET Core configuration</a>. It’s a “mere” 77-minute read according to Microsoft.</p>
 
 <p>Almost every organisation should be running multiple different instances of the same application, with different configurations. There could be any number of reasons for this. Here are some real-world examples:</p>
 
@@ -224,7 +224,7 @@
   </ul>
 </blockquote>
 
-<p>I agree with Matt’s assertion that for basic config we needn’t look further than JSON of YAML. I also agree that, when done wrong, templating and esoteric language features will be more of a bane than a boon.</p>
+<p>I agree with Matt’s assertion that for basic config we needn’t look further than JSON or YAML. I also agree that, when done wrong, templating and esoteric language features will be more of a bane than a boon.</p>
 
 <p>Matt then goes on to mention that these are anti-patterns, and that more advanced configuration languages have been developed (<a href="https://jsonnet.org/">Jsonnet</a>, <a href="https://cuelang.org/">CUE</a>, <a href="https://dhall-lang.org/">Dhall</a>) to solve these problems. On the trend of configuration languages becoming ever more advanced Matt says:</p>
 
@@ -250,26 +250,26 @@
 
 <p>Jane Street ended up finding a happy medium with what he calls a “config generation” step. I assume this config generation step involves evaluating all the configuration code and producing some sort of output (JSON or other) that can be versioned separately from the application code and the config source code.</p>
 
-<p>As an engineer in the Platform Engineering team at <a href="https://www.mavensecurities.com/">Maven Securities</a> I can say that I have been on much the same journey as Dominick. Over the last year I have been setting the vision and direction for Maven’s internal developer platform. In the process I’ve had to redesign a lot of the implementation of the config management and deployment infrastructure.</p>
+<p>As an engineer in a Platform Engineering team, I can say that I have been on much the same journey as Dominick. Over the last year I have been setting the vision and direction for the company’s internal developer platform. In the process I’ve had to redesign a lot of the implementation of the config management and deployment infrastructure.</p>
 
-<p>Maven’s configuration management system is YAML-based. These YAML files are called specs. There are three different types of specs:</p>
+<p>The configuration management system is YAML-based. There are three different types of config YAML files:</p>
 
 <ul>
-  <li><strong>Configspecs</strong>: libraries that can be shared between multiple applications or inherited from.</li>
-  <li><strong>Appspecs</strong>: map one-to-one with applications that are deployed within Maven’s infrastructure. In object-oriented terms, these would be classes.</li>
-  <li><strong>Deployspecs</strong>: contain the definitions of all the instances of applications. In object-oriented terms, these would be instantiations of the classes defined in the appspecs.</li>
+  <li><strong>Libraries</strong>: can be shared between multiple applications or inherited from.</li>
+  <li><strong>Applications</strong>: map one-to-one with applications that are deployed within the company’s infrastructure. In object-oriented terms, these would be classes.</li>
+  <li><strong>Deployments</strong>: contain the definitions of all the instances of applications. In object-oriented terms, these would be instantiations of the classes defined in the application config YAMLs.</li>
 </ul>
 
-<p>Configspecs and Appspecs can declare:</p>
+<p>Libraries and Applications can declare:</p>
 
 <ul>
-  <li><strong>Variables declarations</strong>: type, data type, default definition.</li>
+  <li><strong>Variable declarations</strong>: type, data type, default definition.</li>
   <li><strong>Plugin definitions</strong>: often some external systems need to be configured in order for the application to function properly (e.g. httpd config, systemd units, or crontab entries).</li>
   <li><strong>Commands</strong>: command line string that gets run on start, or custom commands.</li>
   <li><strong>Hooks</strong>: custom commands that are executed at certain points in the application lifecycle.</li>
 </ul>
 
-<p>Deployspecs can define:</p>
+<p>Deployments can define:</p>
 
 <ul>
   <li><strong>Instance</strong>: the name of a specific deployment. Must be unique.</li>
@@ -277,138 +277,138 @@
   <li><strong>Environment</strong>: dev, test, stage, prod.</li>
 </ul>
 
-<p>Certain clearly defined fields (variables, commands, hooks, plugin definitions) can use Jinja templates to that can reference variables that are defined within the same scope or imported scopes. This allows engineers to share common config between related applications/instances. Engineers also have access to the power of Jinja’s templating engine with <a href="https://jinja.palletsprojects.com/en/3.0.x/nativetypes/">Native types</a> which allows returning Python types as the result of rendering Jinja templates. Jinja implements a subset of Python along with useful primitives for string manipulation such as filters.</p>
+<p>Certain clearly defined fields (variables, commands, hooks, plugin definitions) can use Jinja templates that can reference variables that are defined within the same scope or imported scopes. This allows engineers to share common config between related applications/instances. Engineers also have access to the power of Jinja’s templating engine with <a href="https://jinja.palletsprojects.com/en/3.0.x/nativetypes/">Native types</a> which allows returning Python types as the result of rendering Jinja templates. Jinja implements a subset of Python along with useful primitives for string manipulation such as filters.</p>
 
-<p>All specs are stored and versioned in a central git repository. This versions the source of config and enforces the regular software development best practices of pull requests and code reviews.</p>
+<p>All config YAMLs are stored and versioned in a central git repository. This versions the source of config and enforces the regular software development best practices of pull requests and code reviews.</p>
 
-<p>As a simple, somewhat contrived example we could have one application that consumes some data feed of trades and publishes it to a Kafka topic. We could then also have a consumer that reads from that same Kafka topic. Ignoring the complexities around Kafka partitioning, we could define the config for these fictional applications as follows:</p>
+<p>As a simple, somewhat contrived example we could have one application that consumes some data feed of trades and publishes it to a Kafka topic. We could then also have a consumer that reads from the same Kafka topic. Ignoring the complexities around Kafka partitioning, we could define the config for these fictional applications as follows:</p>
 
 <p>The Kafka configuration can be shared between instances. We place this in its own configspec.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1"># kafka.configspec.yml</span>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1"># kafka.library.yml</span>
 
-<span class="s">variables</span><span class="pi">:</span>
-    <span class="s">bootstrap_servers</span><span class="pi">:</span>
-        <span class="s">type</span><span class="pi">:</span> <span class="s">static</span>
-        <span class="s">data_type</span><span class="pi">:</span> <span class="s">string</span>
+<span class="s">variable_declarations</span><span class="pi">:</span>
+  <span class="s">bootstrap_servers</span><span class="pi">:</span>
+    <span class="s">type</span><span class="pi">:</span> <span class="s">static</span>
+    <span class="s">data_type</span><span class="pi">:</span> <span class="s">string</span>
 
 <span class="s">instances</span><span class="pi">:</span>
-    <span class="s">dev</span><span class="pi">:</span>
-        <span class="s">bootstrap_servers</span><span class="pi">:</span> <span class="s">kafkadev3,kafkadev4,kafkadev5</span>
-    <span class="s">prod</span><span class="pi">:</span>
-        <span class="s">bootstrap_servers</span><span class="pi">:</span> <span class="s">kafkaprod11,kafkaprod12,kafkaprod13</span>
+  <span class="s">dev</span><span class="pi">:</span>
+    <span class="s">bootstrap_servers</span><span class="pi">:</span> <span class="s">kafkadev3,kafkadev4,kafkadev5</span>
+  <span class="s">prod</span><span class="pi">:</span>
+    <span class="s">bootstrap_servers</span><span class="pi">:</span> <span class="s">kafkaprod11,kafkaprod12,kafkaprod13</span>
 </code></pre>
 </div>
 
 <p>Notice how we’ve defined a set of Kafka bootstrap server hostnames per environment.</p>
 
-<p>The producer should have its own appspec:</p>
+<p>The producer should have its own application config:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1"># producer.appspec.yml</span>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1"># producer.application.yml</span>
 
 <span class="s">import</span><span class="pi">:</span>
-    <span class="pi">-</span> <span class="s">name</span><span class="pi">:</span> <span class="s">kafka</span>
-      <span class="s">instance</span><span class="pi">:</span> <span class="s1">'</span><span class="s">{{</span><span class="nv"> </span><span class="s">environment</span><span class="nv"> </span><span class="s">}}'</span>
-    <span class="pi">-</span> <span class="s">name</span><span class="pi">:</span> <span class="s">resource</span>
+  <span class="pi">-</span> <span class="s">name</span><span class="pi">:</span> <span class="s">kafka</span>
+    <span class="s">instance</span><span class="pi">:</span> <span class="s1">'</span><span class="s">{{</span><span class="nv"> </span><span class="s">environment</span><span class="nv"> </span><span class="s">}}'</span>
+  <span class="pi">-</span> <span class="s">name</span><span class="pi">:</span> <span class="s">resource</span>
 
-<span class="s">variables</span><span class="pi">:</span>
-    <span class="s">telemetry_port</span><span class="pi">:</span>
-        <span class="s">type</span><span class="pi">:</span> <span class="s">runtime</span>
-        <span class="s">data_type</span><span class="pi">:</span> <span class="s">integer</span>
-        <span class="s">default</span><span class="pi">:</span> <span class="s1">'</span><span class="s">{{</span><span class="nv"> </span><span class="s">resource.tcp_port()</span><span class="nv"> </span><span class="s">}}'</span>
-    <span class="s">trading_instrument</span><span class="pi">:</span>
-        <span class="s">type</span><span class="pi">:</span> <span class="s">static</span>
-        <span class="s">data_type</span><span class="pi">:</span> <span class="s">string</span>
+<span class="s">variable_declarations</span><span class="pi">:</span>
+  <span class="s">telemetry_port</span><span class="pi">:</span>
+    <span class="s">type</span><span class="pi">:</span> <span class="s">runtime</span>
+    <span class="s">data_type</span><span class="pi">:</span> <span class="s">integer</span>
+    <span class="s">default</span><span class="pi">:</span> <span class="s1">'</span><span class="s">{{</span><span class="nv"> </span><span class="s">resource.tcp_port()</span><span class="nv"> </span><span class="s">}}'</span>
+  <span class="s">trading_instrument</span><span class="pi">:</span>
+    <span class="s">type</span><span class="pi">:</span> <span class="s">static</span>
+    <span class="s">data_type</span><span class="pi">:</span> <span class="s">string</span>
 
 <span class="s">commands</span><span class="pi">:</span>
-    <span class="s">start</span><span class="pi">:</span> <span class="pi">&gt;</span>
-        <span class="no">bin/producer</span>
-            <span class="no">--bootstrap-servers {{ kafka.bootstrap_servers }}</span>
-            <span class="no">--kafka-topic trades-{{ trading_instrument }}</span>
-            <span class="no">--telemetry-port {{ telemetry_port }}</span>
-            <span class="no">--trading-instrument {{ trading_instrument }}</span>
+  <span class="s">start</span><span class="pi">:</span> <span class="pi">&gt;</span>
+    <span class="no">bin/producer</span>
+      <span class="no">--bootstrap-servers {{ kafka.bootstrap_servers }}</span>
+      <span class="no">--kafka-topic trades-{{ trading_instrument }}</span>
+      <span class="no">--telemetry-port {{ telemetry_port }}</span>
+      <span class="no">--trading-instrument {{ trading_instrument }}</span>
 </code></pre>
 </div>
 
 <p>The <code class="highlighter-rouge">telemetry_port</code> is a <code class="highlighter-rouge">runtime</code> variable. This means that the value of the variable is not known until the application commands are run. In this specific case, we are allocating a telemetry port for the application dynamically from a pool of reserved ports. Care is taken to ensure that runtime variables cannot be referenced from a static context. Static variables should be resolvable at config generation. The goal is to make as many of the variables static as possible. Static variables offer advantages over runtime variables: they can be statically checked at config generation. Config generation is triggered by a webhook on the version control system. This allows developers to catch classes of errors at code review as opposed to the first time an application is started up in production.</p>
 
-<p>The <code class="highlighter-rouge">trading_instrument</code> is a declared variable that has no default definition. This means that it will have to be overridden in the deployspec.</p>
+<p>The <code class="highlighter-rouge">trading_instrument</code> is a declared variable that has no default definition. This means that it will have to be overridden in the deployment config.</p>
 
-<p>The consumer should also have its own appspec:</p>
+<p>The consumer should also have its own application config:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1"># consumer.appspec.yml</span>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1"># consumer.application.yml</span>
 
 <span class="s">import</span><span class="pi">:</span>
-    <span class="pi">-</span> <span class="s">name</span><span class="pi">:</span> <span class="s">kafka</span>
-      <span class="s">instance</span><span class="pi">:</span> <span class="s1">'</span><span class="s">{{</span><span class="nv"> </span><span class="s">environment</span><span class="nv"> </span><span class="s">}}'</span>
+  <span class="pi">-</span> <span class="s">name</span><span class="pi">:</span> <span class="s">kafka</span>
+    <span class="s">instance</span><span class="pi">:</span> <span class="s1">'</span><span class="s">{{</span><span class="nv"> </span><span class="s">environment</span><span class="nv"> </span><span class="s">}}'</span>
 
 <span class="s">variables</span><span class="pi">:</span>
-    <span class="s">trading_instrument</span><span class="pi">:</span>
-        <span class="s">type</span><span class="pi">:</span> <span class="s">static</span>
-        <span class="s">data_type</span><span class="pi">:</span> <span class="s">string</span>
+  <span class="s">trading_instrument</span><span class="pi">:</span>
+    <span class="s">type</span><span class="pi">:</span> <span class="s">static</span>
+    <span class="s">data_type</span><span class="pi">:</span> <span class="s">string</span>
 
 <span class="s">commands</span><span class="pi">:</span>
-    <span class="s">start</span><span class="pi">:</span> <span class="pi">&gt;</span>
-        <span class="no">bin/consumer</span>
-            <span class="no">--bootstrap-servers {{ kafka.bootstrap_servers }}</span>
-            <span class="no">--kafka-topic trades-{{ trading_instrument }}</span>
-            <span class="no">--trading-instrument {{ trading_instrument }}</span>
+  <span class="s">start</span><span class="pi">:</span> <span class="pi">&gt;</span>
+    <span class="no">bin/consumer</span>
+      <span class="no">--bootstrap-servers {{ kafka.bootstrap_servers }}</span>
+      <span class="no">--kafka-topic trades-{{ trading_instrument }}</span>
+      <span class="no">--trading-instrument {{ trading_instrument }}</span>
 </code></pre>
 </div>
 
 <p>The consumer can import the same Kafka config as the producer. This means we have no duplicate definition of the Kafka <code class="highlighter-rouge">bootstrap_servers</code>.</p>
 
-<p>The deployspecs define the instances of the producer and consumer:</p>
+<p>The deployment configs define the instances of the producer and consumer:</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1"># producer.deployspec.yml</span>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1"># producer.deployment.yml</span>
 
 <span class="s">application</span><span class="pi">:</span> <span class="s">producer</span>
 <span class="s">deployments</span><span class="pi">:</span>
-    <span class="pi">-</span> <span class="s">instance</span><span class="pi">:</span> <span class="s">default</span>
-      <span class="s">environment</span><span class="pi">:</span> <span class="s">dev</span>
-      <span class="s">overrides</span><span class="pi">:</span>
-        <span class="s">trading_instrument</span><span class="pi">:</span> <span class="s">DUMMY</span>
-    
-    <span class="pi">-</span> <span class="s">instance</span><span class="pi">:</span> <span class="s">SPX</span>
-      <span class="s">environment</span><span class="pi">:</span> <span class="s">prod</span>
-      <span class="s">overrides</span><span class="pi">:</span>
-          <span class="s">trading_instrument</span><span class="pi">:</span> <span class="s">SPX</span>
-    <span class="pi">-</span> <span class="s">instance</span><span class="pi">:</span> <span class="s">DAX</span>
-      <span class="s">environment</span><span class="pi">:</span> <span class="s">prod</span>
-      <span class="s">overrides</span><span class="pi">:</span>
-          <span class="s">trading_instrument</span><span class="pi">:</span> <span class="s">DAX</span>
+  <span class="pi">-</span> <span class="s">instance</span><span class="pi">:</span> <span class="s">default</span>
+    <span class="s">environment</span><span class="pi">:</span> <span class="s">dev</span>
+    <span class="s">overrides</span><span class="pi">:</span>
+      <span class="s">trading_instrument</span><span class="pi">:</span> <span class="s">DUMMY</span>
+  
+  <span class="pi">-</span> <span class="s">instance</span><span class="pi">:</span> <span class="s">SPX</span>
+    <span class="s">environment</span><span class="pi">:</span> <span class="s">prod</span>
+    <span class="s">overrides</span><span class="pi">:</span>
+      <span class="s">trading_instrument</span><span class="pi">:</span> <span class="s">SPX</span>
+  <span class="pi">-</span> <span class="s">instance</span><span class="pi">:</span> <span class="s">DAX</span>
+    <span class="s">environment</span><span class="pi">:</span> <span class="s">prod</span>
+    <span class="s">overrides</span><span class="pi">:</span>
+      <span class="s">trading_instrument</span><span class="pi">:</span> <span class="s">DAX</span>
 </code></pre>
 </div>
 
-<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1"># consumer.deployspec.yml</span>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1"># consumer.deployment.yml</span>
 
 <span class="s">application</span><span class="pi">:</span> <span class="s">consumer</span>
 <span class="s">deployments</span><span class="pi">:</span>
-    <span class="pi">-</span> <span class="s">instance</span><span class="pi">:</span> <span class="s">default</span>
-      <span class="s">environment</span><span class="pi">:</span> <span class="s">dev</span>
-      <span class="s">overrides</span><span class="pi">:</span>
-        <span class="s">trading_instrument</span><span class="pi">:</span> <span class="s">DUMMY</span>
-    
-    <span class="pi">-</span> <span class="s">instance</span><span class="pi">:</span> <span class="s">SPX</span>
-      <span class="s">environment</span><span class="pi">:</span> <span class="s">prod</span>
-      <span class="s">overrides</span><span class="pi">:</span>
-          <span class="s">trading_instrument</span><span class="pi">:</span> <span class="s">SPX</span>
-    <span class="pi">-</span> <span class="s">instance</span><span class="pi">:</span> <span class="s">DAX</span>
-      <span class="s">environment</span><span class="pi">:</span> <span class="s">prod</span>
-      <span class="s">overrides</span><span class="pi">:</span>
-          <span class="s">trading_instrument</span><span class="pi">:</span> <span class="s">DAX</span>
+  <span class="pi">-</span> <span class="s">instance</span><span class="pi">:</span> <span class="s">default</span>
+    <span class="s">environment</span><span class="pi">:</span> <span class="s">dev</span>
+    <span class="s">overrides</span><span class="pi">:</span>
+      <span class="s">trading_instrument</span><span class="pi">:</span> <span class="s">DUMMY</span>
+  
+  <span class="pi">-</span> <span class="s">instance</span><span class="pi">:</span> <span class="s">SPX</span>
+    <span class="s">environment</span><span class="pi">:</span> <span class="s">prod</span>
+    <span class="s">overrides</span><span class="pi">:</span>
+        <span class="s">trading_instrument</span><span class="pi">:</span> <span class="s">SPX</span>
+  <span class="pi">-</span> <span class="s">instance</span><span class="pi">:</span> <span class="s">DAX</span>
+    <span class="s">environment</span><span class="pi">:</span> <span class="s">prod</span>
+    <span class="s">overrides</span><span class="pi">:</span>
+        <span class="s">trading_instrument</span><span class="pi">:</span> <span class="s">DAX</span>
 </code></pre>
 </div>
 
-<p>These specs for our fictional applications would be committed to the central git repository containing all the specs. Once merged to master, the config generation CI step would produce new versions of JSON configurations for these applications in a standardised format that is understood by the deployment system. This JSON config is versioned and the engineer is able to deploy the new version of the config for that application or revert to an older version of the config by simply selecting which version of the config to deploy from a dropdown.</p>
+<p>These deployment configs for our fictional applications would be committed to the central git repository containing all the config YAML files. Once merged to master, the config generation CI step would produce new versions of JSON configurations for these applications in a standardised format that is understood by the deployment system. This JSON config is versioned and the engineer is able to deploy the new version of the config for that application or revert to an older version of the config by simply selecting which version of the config to deploy from a dropdown.</p>
 
 <p>At this point it might be useful to check back with the ideal attributes we defined for our configuration management tooling:</p>
 
-<p><strong>Easy to understand</strong>: I’m biased, but I think the DSL is relatively easy to understand and use. There are only a handful of concepts, the rules are clearly defined, and it’s unlikely that engineers will write unmaintanable config in such a simple DSL.</p>
+<p><strong>Easy to understand</strong>: I’m biased, but I think the DSL is relatively easy to understand and use. There are only a handful of concepts, the rules are clearly defined, and it’s unlikely that engineers will write unmaintainable config in such a simple DSL.</p>
 
 <p><strong>Expressive</strong>: This DSL is not as expressive as a general-purpose programming language, but it still leaves a decent amount of the design decisions of how to structure the config up to the engineer. Variable definitions can be referenced from other variable definitions, namespaces can be imported into other namespaces, and the developer has access to the Jinja templating engine which implements a subset of Python.</p>
 
-<p><strong>Constrained</strong>: The DSL tries to be the happy medium between the extremes of a general-purpose language with no framework and the other extreme of a rigid structure that needs development effort at the framework-layer to support new types of configuration. The constraints that are enforced help reduce complexity and reduces the chances of config becoming unmaintainable.</p>
+<p><strong>Constrained</strong>: The DSL tries to be the happy medium between the extremes of a general-purpose language with no framework and the other extreme of a rigid structure that needs development effort at the framework-layer to support new types of configuration. The constraints that are enforced help reduce complexity and reduce the chances of config becoming unmaintainable.</p>
 
 <p><strong>Statically checked</strong>: The static parts of the config are evaluated at config generation time. This provides a safety net to engineers that allows them to find issues like syntax errors, references to undefined variables, runtime variables referenced from a static context, circular dependencies, and invalid YAML before they even merge their PRs.</p>
 
@@ -436,7 +436,7 @@
 
   <!--- Share on Twitter -->
   
-    <a href="https://twitter.com/intent/tweet?text=Configuration+Languages%3A+A+Balance+of+Constraints+https://sebastiancoetzee.com/2022-12-11-configuration-languages-a-balance-of-constraints"
+    <a href="https://twitter.com/intent/tweet?text=Configuration+Languages%3A+A+Balance+of+Constraints+https://sebastiancoetzee.com/2023-01-02-configuration-languages-a-balance-of-constraints"
       class="btn btn-social-icon btn-twitter" title="Share on Twitter">
       <span class="fa fa-fw fa-twitter" aria-hidden="true"></span>
     </a>
@@ -444,7 +444,7 @@
 
   <!--- Share on Facebook -->
   
-    <a href="https://www.facebook.com/sharer/sharer.php?u=https://sebastiancoetzee.com/2022-12-11-configuration-languages-a-balance-of-constraints"
+    <a href="https://www.facebook.com/sharer/sharer.php?u=https://sebastiancoetzee.com/2023-01-02-configuration-languages-a-balance-of-constraints"
       class="btn btn-social-icon btn-facebook" title="Share on Facebook">
       <span class="fa fa-fw fa-facebook" aria-hidden="true"></span>
     </a>
@@ -455,7 +455,7 @@
 
   <!--- Share on LinkedIn -->
   
-    <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://sebastiancoetzee.com/2022-12-11-configuration-languages-a-balance-of-constraints"
+    <a href="https://www.linkedin.com/shareArticle?mini=true&url=https://sebastiancoetzee.com/2023-01-02-configuration-languages-a-balance-of-constraints"
       class="btn btn-social-icon btn-linkedin" title="Share on LinkedIn">
       <span class="fa fa-fw fa-linkedin" aria-hidden="true"></span>
     </a>
@@ -563,7 +563,7 @@
         <p class="copyright text-muted">
 		  Sebastian Coetzee
 		  &nbsp;&bull;&nbsp;
-		  2022
+		  2023
 
 		  
 		  &nbsp;&bull;&nbsp;

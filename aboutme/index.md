@@ -4,14 +4,11 @@ title: About me
 subtitle: Some background
 ---
 
-My name is Sebastian Coetzee and I am a software engineer. I am a South African living in London.
+My name is Sebastian Coetzee and I am a Software Engineer. I am a South African living in London.
 
-- Born and raised in South Africa.
 - Graduated with a BEng in Chemical Engineering from Stellenbosch University in 2013.
-- Chemical Engineer at Logichem in South Africa for 1 year.
-- Software Engineer at Agile Business Technology in Cape Town.
-- Software Engineer at ProfitScience in Cape Town - 1 year.
-- Software Engineer at ZappiStore in London working on the core software engineering team - 2 years.
-- Software Engineer at Deliveroo in London from April 2018 until present
-
-Hobbies include golf and surfing.
+- Started out my career as a Chemical Engineer but ultimately my interest in software development lead me to pursue a career as a developer.
+- Worked as a developer in Cape Town for a few years.
+- Moved to London in 2017.
+- Software Engineer at Zappi, Deliveroo, and OakNorth.
+- Started working at proprietary trading firm Maven Securities in 2021.
