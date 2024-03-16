@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+  <!-- Beautiful Jekyll | MIT license | Copyright Dean Attali 2016 -->
+  <head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <title>Advent of Code 2023 in OCaml - Day 1</title>
+
+  <meta name="author" content="Sebastian Coetzee" />
+
+  
+
+  <link rel="alternate" type="application/rss+xml" title="Sebastian Coetzee - Software Developer living in London" href="/feed.xml" />
+
+  
+    
+      <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.6.0/css/font-awesome.min.css" />
+    
+  
+
+  
+    
+      <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    
+      <link rel="stylesheet" href="/css/bootstrap-social.css" />
+    
+      <link rel="stylesheet" href="/css/main.css" />
+    
+  
+
+  
+    
+      <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+    
+      <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" />
+    
+  
+
+  
+
+  
+
+  
+
+    <!-- Facebook OpenGraph tags -->
+  
+
+  
+  <meta property="og:title" content="Advent of Code 2023 in OCaml - Day 1" />
+  
+
+   
+  <meta property="og:description" content="A good way to learn a new programming language is to jump in and solve some practice exercises. At the end of each year Advent of Code release a new coding exercise each day until Christmas. It has become fairly popular over the years. I have had an interest in...">
+  
+
+
+  <meta property="og:type" content="website" />
+
+  
+  <meta property="og:url" content="https://sebastiancoetzee.com/2024-03-16-advent-of-code-ocaml-2023-day-1" />
+  <link rel="canonical" href="https://sebastiancoetzee.com/2024-03-16-advent-of-code-ocaml-2023-day-1" />
+  
+
+  
+  <meta property="og:image" content="https://sebastiancoetzee.com/img/avatar-icon-3.jpeg" />
+  
+  
+
+  <!-- Twitter summary cards -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:site" content="@" />
+  <meta name="twitter:creator" content="@" />
+
+  
+  <meta name="twitter:title" content="Advent of Code 2023 in OCaml - Day 1" />
+  
+
+  
+  <meta name="twitter:description" content="A good way to learn a new programming language is to jump in and solve some practice exercises. At the end of each year Advent of Code release a new coding exercise each day until Christmas. It has become fairly popular over the years. I have had an interest in...">
+  
+
+  
+  <meta name="twitter:image" content="https://sebastiancoetzee.com/img/avatar-icon-3.jpeg" />
+  
+
+</head>
+
+
+  <body>
+  
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="https://sebastiancoetzee.com">Sebastian Coetzee</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+          <li>
+            
+            
+
+
+
+
+
+<a href="/">Home</a>
+
+          </li>
+        
+        
+        
+          <li>
+            
+            
+
+
+
+
+
+<a href="/aboutme">About Me</a>
+
+          </li>
+        
+        
+      </ul>
+    </div>
+
+	
+	<div class="avatar-container">
+	  <div class="avatar-img-border">
+	    <a href="https://sebastiancoetzee.com ">
+	      <img class="avatar-img" src="/img/avatar-icon-3.jpeg" />
+		</a>
+	  </div>
+	</div>
+	
+
+  </div>
+</nav>
+
+
+    <!-- TODO this file has become a mess, refactor it -->
+
+
+
+
+
+<header class="header-section ">
+
+<div class="intro-header no-img">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <div class="post-heading">
+          <h1>Advent of Code 2023 in OCaml - Day 1</h1>
+		  
+		  
+		  
+		  <span class="post-meta">Posted on March 16, 2024</span>
+		  
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</header>
+
+
+
+
+<div class="container">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+
+      <article role="main" class="blog-post">
+        <p>A good way to learn a new programming language is to jump in and solve some practice exercises. At the end of each year Advent of Code release a new coding exercise each day until Christmas. It has become fairly popular over the years.</p>
+
+<p>I have had an interest in the functional paradigm for a while, so this year I decided to complete the <a href="https://adventofcode.com/2023">Advent of Code 2023</a> exercises in <a href="https://ocaml.org/">OCaml</a>. So, let’s jump straight into the first day’s exercise.</p>
+
+<p><strong>Note:</strong> I will be using Jane Street’s <a href="https://ocaml.org/p/core/latest">core</a> library as a replacement for OCaml’s standard library.</p>
+
+<h2 id="part-1">Part 1</h2>
+
+<h3 id="problem-statement">Problem Statement</h3>
+
+<p>There is a long-winded story about the Elves and a weather machine and so on, but let’s just distill it down to a simple problem statement. Basically, we are given an input string that consists of lines of text. For each line of text, we should find the first and last digit in the line, combine them together, and parse them as an integer. We should then sum up all the integers.</p>
+
+<p>Example input:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>1abc2
+pqr3stu8vwx
+a1b2c3d4e5f
+treb7uchet
+</code></pre>
+</div>
+
+<p>Correct answer:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>12 + 38 + 15 + 77 = 142
+</code></pre>
+</div>
+
+<p>Note that the last line only contains a single digit. So, that single digit is the first and the last digit.</p>
+
+<h3 id="solution">Solution</h3>
+
+<p>To start with we will create a function to parse a digit character into an integer using its ASCII code. The <code class="highlighter-rouge">Char.to_int</code> function returns the ASCII code of a character:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">let</span> <span class="n">char_to_int</span> <span class="n">digit</span> <span class="p">=</span>
+  <span class="k">let</span> <span class="n">zero</span> <span class="p">=</span> <span class="nn">Char</span><span class="p">.</span><span class="n">to_int</span> <span class="k">'</span><span class="mi">0</span><span class="k">'</span> <span class="k">in</span>
+  <span class="nn">Char</span><span class="p">.</span><span class="n">to_int</span> <span class="n">digit</span> <span class="p">-</span> <span class="n">zero</span>
+</code></pre>
+</div>
+
+<p>Let’s now define a function that returns a tuple with the first and last digit character in a line:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">let</span> <span class="n">digits_from_line</span> <span class="n">line</span> <span class="p">=</span>
+  <span class="k">let</span> <span class="n">left_char</span> <span class="p">=</span> <span class="nn">String</span><span class="p">.</span><span class="n">find</span> <span class="n">line</span> <span class="p">~</span><span class="n">f</span><span class="p">:</span><span class="nn">Char</span><span class="p">.</span><span class="n">is_digit</span> <span class="k">in</span>
+  <span class="k">let</span> <span class="n">right_char</span> <span class="p">=</span> <span class="nn">String</span><span class="p">.</span><span class="n">find</span> <span class="p">(</span><span class="nn">String</span><span class="p">.</span><span class="n">rev</span> <span class="n">line</span><span class="p">)</span> <span class="p">~</span><span class="n">f</span><span class="p">:</span><span class="nn">Char</span><span class="p">.</span><span class="n">is_digit</span> <span class="k">in</span>
+  <span class="k">match</span> <span class="p">(</span><span class="n">left_char</span><span class="p">,</span> <span class="n">right_char</span><span class="p">)</span> <span class="k">with</span>
+  <span class="p">|</span> <span class="nc">Some</span> <span class="n">left_char</span><span class="p">,</span> <span class="nc">Some</span> <span class="n">right_char</span> <span class="p">-&gt;</span> <span class="p">(</span><span class="n">left_char</span><span class="p">,</span> <span class="n">right_char</span><span class="p">)</span>
+  <span class="p">|</span> <span class="p">_</span> <span class="p">-&gt;</span> <span class="k">raise</span> <span class="p">(</span><span class="nc">Failure</span> <span class="s2">"Couldn't find a digit in the string"</span><span class="p">)</span>
+</code></pre>
+</div>
+
+<p>The <code class="highlighter-rouge">digits_from_line</code> function gets the first and last character digit: <code class="highlighter-rouge">left_char</code> and <code class="highlighter-rouge">right_char</code> respectively. A pattern match is used to check if either of these values are <code class="highlighter-rouge">None</code>. If either is <code class="highlighter-rouge">None</code> it raises a <code class="highlighter-rouge">Failure</code>.</p>
+
+<p>We can now combine these two functions to calculate the integer value for each line:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">let</span> <span class="n">num_from_line</span> <span class="n">line</span> <span class="p">=</span>
+  <span class="k">let</span> <span class="n">left_digit</span><span class="p">,</span> <span class="n">right_digit</span> <span class="p">=</span> <span class="n">digits_from_line</span> <span class="n">line</span> <span class="k">in</span>
+  <span class="p">(</span><span class="n">char_to_int</span> <span class="n">left_digit</span> <span class="p">*</span> <span class="mi">10</span><span class="p">)</span> <span class="o">+</span> <span class="n">char_to_int</span> <span class="n">right_digit</span>
+</code></pre>
+</div>
+
+<p>At this point we can write a function that sums all the lines in a list of lines:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">let</span> <span class="n">sum_lines</span> <span class="n">lines</span> <span class="p">=</span>
+  <span class="k">let</span> <span class="n">sum_nums</span> <span class="n">acc</span> <span class="n">line</span> <span class="p">=</span> <span class="n">acc</span> <span class="o">+</span> <span class="n">num_from_line</span> <span class="n">line</span> <span class="k">in</span>
+  <span class="nn">List</span><span class="p">.</span><span class="n">fold</span> <span class="n">lines</span> <span class="p">~</span><span class="n">init</span><span class="p">:</span><span class="mi">0</span> <span class="p">~</span><span class="n">f</span><span class="p">:</span><span class="n">sum_nums</span>
+</code></pre>
+</div>
+
+<p>The <code class="highlighter-rouge">List.fold</code> function takes an initial value which it then uses as an accumulator that’s passed into the <code class="highlighter-rouge">f</code> function along with each line. The accumulator’s new value for each line is the return value of the <code class="highlighter-rouge">f</code> function.</p>
+
+<p>The last thing that remains is to actually read the input from a file and print the answer to stdout:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">let</span> <span class="bp">()</span> <span class="p">=</span>
+  <span class="k">let</span> <span class="n">lines</span> <span class="p">=</span> <span class="nn">In_channel</span><span class="p">.</span><span class="n">read_lines</span> <span class="s2">"inputs/day_01.txt"</span> <span class="k">in</span>
+  <span class="k">let</span> <span class="n">answer</span> <span class="p">=</span> <span class="n">sum_lines</span> <span class="n">lines</span> <span class="k">in</span>
+  <span class="nn">Printf</span><span class="p">.</span><span class="n">printf</span> <span class="s2">"Answer for part 1: %d</span><span class="se">\n</span><span class="s2">"</span> <span class="n">answer</span>
+</code></pre>
+</div>
+
+<p>Putting this all together we end up with a <code class="highlighter-rouge">.ml</code> file like this:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">open</span><span class="o">!</span> <span class="nc">Core</span>
+
+<span class="k">let</span> <span class="n">char_to_int</span> <span class="n">digit</span> <span class="p">=</span>
+  <span class="k">let</span> <span class="n">zero</span> <span class="p">=</span> <span class="nn">Char</span><span class="p">.</span><span class="n">to_int</span> <span class="k">'</span><span class="mi">0</span><span class="k">'</span> <span class="k">in</span>
+  <span class="nn">Char</span><span class="p">.</span><span class="n">to_int</span> <span class="n">digit</span> <span class="p">-</span> <span class="n">zero</span>
+
+<span class="k">let</span> <span class="n">digits_from_line</span> <span class="n">line</span> <span class="p">=</span>
+  <span class="k">let</span> <span class="n">left_char</span> <span class="p">=</span> <span class="nn">String</span><span class="p">.</span><span class="n">find</span> <span class="n">line</span> <span class="p">~</span><span class="n">f</span><span class="p">:</span><span class="nn">Char</span><span class="p">.</span><span class="n">is_digit</span> <span class="k">in</span>
+  <span class="k">let</span> <span class="n">right_char</span> <span class="p">=</span> <span class="nn">String</span><span class="p">.</span><span class="n">find</span> <span class="p">(</span><span class="nn">String</span><span class="p">.</span><span class="n">rev</span> <span class="n">line</span><span class="p">)</span> <span class="p">~</span><span class="n">f</span><span class="p">:</span><span class="nn">Char</span><span class="p">.</span><span class="n">is_digit</span> <span class="k">in</span>
+  <span class="k">match</span> <span class="p">(</span><span class="n">left_char</span><span class="p">,</span> <span class="n">right_char</span><span class="p">)</span> <span class="k">with</span>
+  <span class="p">|</span> <span class="nc">Some</span> <span class="n">left_char</span><span class="p">,</span> <span class="nc">Some</span> <span class="n">right_char</span> <span class="p">-&gt;</span> <span class="p">(</span><span class="n">left_char</span><span class="p">,</span> <span class="n">right_char</span><span class="p">)</span>
+  <span class="p">|</span> <span class="p">_</span> <span class="p">-&gt;</span> <span class="k">raise</span> <span class="p">(</span><span class="nc">Failure</span> <span class="s2">"Couldn't find a digit in the string"</span><span class="p">)</span>
+
+<span class="k">let</span> <span class="n">num_from_line</span> <span class="n">line</span> <span class="p">=</span>
+  <span class="k">let</span> <span class="n">left_digit</span><span class="p">,</span> <span class="n">right_digit</span> <span class="p">=</span> <span class="n">digits_from_line</span> <span class="n">line</span> <span class="k">in</span>
+  <span class="p">(</span><span class="n">char_to_int</span> <span class="n">left_digit</span> <span class="p">*</span> <span class="mi">10</span><span class="p">)</span> <span class="o">+</span> <span class="n">char_to_int</span> <span class="n">right_digit</span>
+
+<span class="k">let</span> <span class="n">sum_lines</span> <span class="n">lines</span> <span class="p">=</span>
+  <span class="k">let</span> <span class="n">sum_nums</span> <span class="n">acc</span> <span class="n">line</span> <span class="p">=</span> <span class="n">acc</span> <span class="o">+</span> <span class="n">num_from_line</span> <span class="n">line</span> <span class="k">in</span>
+  <span class="nn">List</span><span class="p">.</span><span class="n">fold</span> <span class="n">lines</span> <span class="p">~</span><span class="n">init</span><span class="p">:</span><span class="mi">0</span> <span class="p">~</span><span class="n">f</span><span class="p">:</span><span class="n">sum_nums</span>
+
+<span class="k">let</span> <span class="bp">()</span> <span class="p">=</span>
+  <span class="k">let</span> <span class="n">lines</span> <span class="p">=</span> <span class="nn">In_channel</span><span class="p">.</span><span class="n">read_lines</span> <span class="s2">"inputs/day_01.txt"</span> <span class="k">in</span>
+  <span class="k">let</span> <span class="n">answer</span> <span class="p">=</span> <span class="n">sum_lines</span> <span class="n">lines</span> <span class="k">in</span>
+  <span class="nn">Printf</span><span class="p">.</span><span class="n">printf</span> <span class="s2">"Answer for part 1: %d</span><span class="se">\n</span><span class="s2">"</span> <span class="n">answer</span>
+</code></pre>
+</div>
+
+<p>When this is compiled and ran we can confirm that we get the correct answer:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>Answer for part 1: 142
+</code></pre>
+</div>
+
+<p>Great! Now on to part two.</p>
+
+<h2 id="part-2">Part 2</h2>
+
+<h3 id="problem-statement-1">Problem Statement</h3>
+
+<p>In a similar way to the first part we need to combine the first and last digit in the string on a line to get a number. However, in part 2 it is also valid if the number is spelled out with letters.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>two1nine
+eightwothree
+abcone2threexyz
+xtwone3four
+4nineeightseven2
+zoneight234
+7pqrstsixteen
+</code></pre>
+</div>
+
+<p>Given this input, the first line will have a number <code class="highlighter-rouge">29</code> because the first spelled out digit is <code class="highlighter-rouge">two</code> and the last spelled out digit is <code class="highlighter-rouge">nine</code>. The last line has a number <code class="highlighter-rouge">76</code> because the first digit is <code class="highlighter-rouge">7</code> and the last spelled out digit is <code class="highlighter-rouge">six</code>.</p>
+
+<p>The correct answer for the above input would be: <code class="highlighter-rouge">29 + 83 + 13 + 24 + 42 + 14 + 76 = 281</code></p>
+
+<h3 id="solution-1">Solution</h3>
+
+<p>As a first step we define an association list that maps integer values to their spelled out words:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">let</span> <span class="n">digits_to_words</span> <span class="p">=</span>
+  <span class="p">[</span>
+    <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">"zero"</span><span class="o">);</span>
+    <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">"one"</span><span class="o">);</span>
+    <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s2">"two"</span><span class="o">);</span>
+    <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s2">"three"</span><span class="o">);</span>
+    <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s2">"four"</span><span class="o">);</span>
+    <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s2">"five"</span><span class="o">);</span>
+    <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="s2">"six"</span><span class="o">);</span>
+    <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="s2">"seven"</span><span class="o">);</span>
+    <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="s2">"eight"</span><span class="o">);</span>
+    <span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="s2">"nine"</span><span class="o">);</span>
+  <span class="p">]</span>
+</code></pre>
+</div>
+
+<p>Next up we want a function that can find each of these spelled out words in the string and return the index and value of the first occurrence:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">let</span> <span class="n">find_first_word</span> <span class="n">line</span> <span class="n">digits_to_words</span> <span class="p">=</span>
+  <span class="c">(* Find the first occurrence of a word in the line. Check if the index is
+     smaller than the smallest index encountered so far and then return it.
+     Otherwise it's not the smallest index and we return the current smallest
+     index. *)</span>
+  <span class="k">let</span> <span class="n">find_word</span> <span class="p">(</span><span class="n">min_idx</span><span class="p">,</span> <span class="n">acc_digit</span><span class="p">)</span> <span class="p">(</span><span class="n">digit</span><span class="p">,</span> <span class="n">word</span><span class="p">)</span> <span class="p">=</span>
+    <span class="k">let</span> <span class="n">idx</span> <span class="p">=</span> <span class="nn">String</span><span class="p">.</span><span class="n">substr_index</span> <span class="n">line</span> <span class="p">~</span><span class="n">pattern</span><span class="p">:</span><span class="n">word</span> <span class="k">in</span>
+    <span class="k">match</span> <span class="n">idx</span> <span class="k">with</span>
+    <span class="p">|</span> <span class="nc">Some</span> <span class="n">idx</span> <span class="p">-&gt;</span> <span class="k">if</span> <span class="n">idx</span> <span class="p">&lt;</span> <span class="n">min_idx</span> <span class="k">then</span> <span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">digit</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="n">min_idx</span><span class="p">,</span> <span class="n">acc_digit</span><span class="p">)</span>
+    <span class="p">|</span> <span class="nc">None</span> <span class="p">-&gt;</span> <span class="p">(</span><span class="n">min_idx</span><span class="p">,</span> <span class="n">acc_digit</span><span class="p">)</span>
+  <span class="k">in</span>
+  <span class="k">let</span> <span class="n">min_idx</span><span class="p">,</span> <span class="n">acc_digit</span> <span class="p">=</span>
+    <span class="nn">List</span><span class="p">.</span><span class="n">fold</span> <span class="n">digits_to_words</span> <span class="p">~</span><span class="n">init</span><span class="o">:(</span><span class="nn">Int</span><span class="p">.</span><span class="n">max_value</span><span class="p">,</span> <span class="nn">Int</span><span class="p">.</span><span class="n">max_value</span><span class="p">)</span> <span class="p">~</span><span class="n">f</span><span class="p">:</span><span class="n">find_word</span>
+  <span class="k">in</span>
+  <span class="k">if</span> <span class="n">min_idx</span> <span class="p">=</span> <span class="nn">Int</span><span class="p">.</span><span class="n">max_value</span> <span class="k">then</span> <span class="nc">None</span> <span class="k">else</span> <span class="nc">Some</span> <span class="p">(</span><span class="n">min_idx</span><span class="p">,</span> <span class="n">acc_digit</span><span class="p">)</span>
+
+<span class="k">let</span> <span class="n">find_first_word_left</span> <span class="n">line</span> <span class="p">=</span> <span class="n">find_first_word</span> <span class="n">line</span> <span class="n">digits_to_words</span>
+
+<span class="c">(* When we look for the first word from the right, we have to reverse the line
+   and the letters of the spelled out numbers we are checking for. *)</span>
+<span class="k">let</span> <span class="n">find_first_word_right</span> <span class="n">line</span> <span class="p">=</span>
+  <span class="n">find_first_word</span> <span class="p">(</span><span class="nn">String</span><span class="p">.</span><span class="n">rev</span> <span class="n">line</span><span class="p">)</span>
+    <span class="p">(</span><span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="n">digits_to_words</span> <span class="p">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="p">(</span><span class="n">digit</span><span class="p">,</span> <span class="n">word</span><span class="p">)</span> <span class="p">-&gt;</span> <span class="p">(</span><span class="n">digit</span><span class="p">,</span> <span class="nn">String</span><span class="p">.</span><span class="n">rev</span> <span class="n">word</span><span class="o">)))</span>
+</code></pre>
+</div>
+
+<p>Take note that <code class="highlighter-rouge">find_first_word_right</code> has the same logic as <code class="highlighter-rouge">find_first_word_left</code> except that both the input <code class="highlighter-rouge">line</code> and the words that are matched against are reversed.</p>
+
+<p>The logic for finding the first digit is similar to part 1:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c">(* Find the first digit in the line from the left. Return the index of the digit
+   as well as its integer value. *)</span>
+<span class="k">let</span> <span class="n">find_first_digit_left</span> <span class="n">line</span> <span class="p">=</span>
+  <span class="k">match</span> <span class="nn">String</span><span class="p">.</span><span class="n">findi</span> <span class="n">line</span> <span class="p">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="p">_</span> <span class="n">c</span> <span class="p">-&gt;</span> <span class="nn">Char</span><span class="p">.</span><span class="n">is_digit</span> <span class="n">c</span><span class="p">)</span> <span class="k">with</span>
+  <span class="p">|</span> <span class="nc">Some</span> <span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">first_digit</span><span class="p">)</span> <span class="p">-&gt;</span> <span class="nc">Some</span> <span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">char_to_int</span> <span class="n">first_digit</span><span class="p">)</span>
+  <span class="p">|</span> <span class="nc">None</span> <span class="p">-&gt;</span> <span class="nc">None</span>
+
+<span class="c">(* To get the first digit from the right we simply reverse the input line and
+   then get the first digit from the left. *)</span>
+<span class="k">let</span> <span class="n">find_first_digit_right</span> <span class="n">line</span> <span class="p">=</span> <span class="n">find_first_digit_left</span> <span class="p">(</span><span class="nn">String</span><span class="p">.</span><span class="n">rev</span> <span class="n">line</span><span class="p">)</span>
+</code></pre>
+</div>
+
+<p>Now we can combine these into one function that can check for both spelled out words and digits:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c">(* Try to find the first word and the first digit in the string. Pick the one
+   with the lowest index and return the value. If none are found, return None. *)</span>
+<span class="k">let</span> <span class="n">find_first_num</span> <span class="n">line</span> <span class="p">~</span><span class="n">f1</span> <span class="p">~</span><span class="n">f2</span> <span class="p">=</span>
+  <span class="k">match</span> <span class="p">(</span><span class="n">f1</span> <span class="n">line</span><span class="p">,</span> <span class="n">f2</span> <span class="n">line</span><span class="p">)</span> <span class="k">with</span>
+  <span class="p">|</span> <span class="nc">Some</span> <span class="p">(</span><span class="n">idx1</span><span class="p">,</span> <span class="n">digit1</span><span class="o">),</span> <span class="nc">Some</span> <span class="p">(</span><span class="n">idx2</span><span class="p">,</span> <span class="n">digit2</span><span class="p">)</span> <span class="p">-&gt;</span>
+      <span class="k">if</span> <span class="n">idx1</span> <span class="p">&lt;</span> <span class="n">idx2</span> <span class="k">then</span> <span class="nc">Some</span> <span class="n">digit1</span> <span class="k">else</span> <span class="nc">Some</span> <span class="n">digit2</span>
+  <span class="p">|</span> <span class="nc">Some</span> <span class="o">(_,</span> <span class="n">digit1</span><span class="o">),</span> <span class="nc">None</span> <span class="p">-&gt;</span> <span class="nc">Some</span> <span class="n">digit1</span>
+  <span class="p">|</span> <span class="nc">None</span><span class="p">,</span> <span class="nc">Some</span> <span class="o">(_,</span> <span class="n">digit2</span><span class="p">)</span> <span class="p">-&gt;</span> <span class="nc">Some</span> <span class="n">digit2</span>
+  <span class="p">|</span> <span class="nc">None</span><span class="p">,</span> <span class="nc">None</span> <span class="p">-&gt;</span> <span class="nc">None</span>
+
+<span class="k">let</span> <span class="n">find_first_num_left</span> <span class="p">=</span>
+  <span class="n">find_first_num</span> <span class="p">~</span><span class="n">f1</span><span class="p">:</span><span class="n">find_first_word_left</span> <span class="p">~</span><span class="n">f2</span><span class="p">:</span><span class="n">find_first_digit_left</span>
+
+<span class="k">let</span> <span class="n">find_first_num_right</span> <span class="p">=</span>
+  <span class="n">find_first_num</span> <span class="p">~</span><span class="n">f1</span><span class="p">:</span><span class="n">find_first_word_right</span> <span class="p">~</span><span class="n">f2</span><span class="p">:</span><span class="n">find_first_digit_right</span>
+</code></pre>
+</div>
+
+<p>Putting it all together we can parse the input and come up with an answer:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">let</span> <span class="n">num_from_line</span> <span class="n">line</span> <span class="p">=</span>
+  <span class="k">match</span> <span class="p">(</span><span class="n">find_first_num_left</span> <span class="n">line</span><span class="p">,</span> <span class="n">find_first_num_right</span> <span class="n">line</span><span class="p">)</span> <span class="k">with</span>
+  <span class="p">|</span> <span class="nc">Some</span> <span class="n">left</span><span class="p">,</span> <span class="nc">Some</span> <span class="n">right</span> <span class="p">-&gt;</span> <span class="p">(</span><span class="n">left</span> <span class="p">*</span> <span class="mi">10</span><span class="p">)</span> <span class="o">+</span> <span class="n">right</span>
+  <span class="p">|</span> <span class="p">_</span> <span class="p">-&gt;</span> <span class="k">raise</span> <span class="p">(</span><span class="nc">Failure</span> <span class="s2">"Couldn't find a digit in the string"</span><span class="p">)</span>
+
+<span class="k">let</span> <span class="n">sum_lines</span> <span class="n">lines</span> <span class="p">=</span>
+  <span class="k">let</span> <span class="n">sum_nums</span> <span class="n">acc</span> <span class="n">line</span> <span class="p">=</span> <span class="n">acc</span> <span class="o">+</span> <span class="n">num_from_line</span> <span class="n">line</span> <span class="k">in</span>
+  <span class="nn">List</span><span class="p">.</span><span class="n">fold</span> <span class="n">lines</span> <span class="p">~</span><span class="n">init</span><span class="p">:</span><span class="mi">0</span> <span class="p">~</span><span class="n">f</span><span class="p">:</span><span class="n">sum_nums</span>
+
+<span class="k">let</span> <span class="bp">()</span> <span class="p">=</span>
+  <span class="k">let</span> <span class="n">lines</span> <span class="p">=</span> <span class="nn">In_channel</span><span class="p">.</span><span class="n">read_lines</span> <span class="s2">"inputs/day_01.txt"</span> <span class="k">in</span>
+  <span class="k">let</span> <span class="n">answer</span> <span class="p">=</span> <span class="n">sum_lines</span> <span class="n">lines</span> <span class="k">in</span>
+  <span class="nn">Printf</span><span class="p">.</span><span class="n">printf</span> <span class="s2">"Answer for part 2: %d</span><span class="se">\n</span><span class="s2">"</span> <span class="n">answer</span>
+</code></pre>
+</div>
+
+<p>For completeness, here is what the entire <code class="highlighter-rouge">.ml</code> file looks like:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">open</span><span class="o">!</span> <span class="nc">Core</span>
+
+<span class="k">let</span> <span class="n">char_to_int</span> <span class="n">digit</span> <span class="p">=</span>
+  <span class="k">let</span> <span class="n">zero</span> <span class="p">=</span> <span class="nn">Char</span><span class="p">.</span><span class="n">to_int</span> <span class="k">'</span><span class="mi">0</span><span class="k">'</span> <span class="k">in</span>
+  <span class="nn">Char</span><span class="p">.</span><span class="n">to_int</span> <span class="n">digit</span> <span class="p">-</span> <span class="n">zero</span>
+
+<span class="c">(* Association list of spelled out digits and their corresponding integer digit
+   values. *)</span>
+<span class="k">let</span> <span class="n">digits_to_words</span> <span class="p">=</span>
+  <span class="p">[</span>
+    <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">"zero"</span><span class="o">);</span>
+    <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">"one"</span><span class="o">);</span>
+    <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s2">"two"</span><span class="o">);</span>
+    <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s2">"three"</span><span class="o">);</span>
+    <span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s2">"four"</span><span class="o">);</span>
+    <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s2">"five"</span><span class="o">);</span>
+    <span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="s2">"six"</span><span class="o">);</span>
+    <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="s2">"seven"</span><span class="o">);</span>
+    <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="s2">"eight"</span><span class="o">);</span>
+    <span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="s2">"nine"</span><span class="o">);</span>
+  <span class="p">]</span>
+
+<span class="k">let</span> <span class="n">find_first_word</span> <span class="n">line</span> <span class="n">digits_to_words</span> <span class="p">=</span>
+  <span class="c">(* Find the first occurrence of a word in the line. Check if the index is
+     smaller than the smallest index encountered so far and then return it.
+     Otherwise it's not the smallest index and we return the current smallest
+     index. *)</span>
+  <span class="k">let</span> <span class="n">find_word</span> <span class="p">(</span><span class="n">min_idx</span><span class="p">,</span> <span class="n">acc_digit</span><span class="p">)</span> <span class="p">(</span><span class="n">digit</span><span class="p">,</span> <span class="n">word</span><span class="p">)</span> <span class="p">=</span>
+    <span class="k">let</span> <span class="n">idx</span> <span class="p">=</span> <span class="nn">String</span><span class="p">.</span><span class="n">substr_index</span> <span class="n">line</span> <span class="p">~</span><span class="n">pattern</span><span class="p">:</span><span class="n">word</span> <span class="k">in</span>
+    <span class="k">match</span> <span class="n">idx</span> <span class="k">with</span>
+    <span class="p">|</span> <span class="nc">Some</span> <span class="n">idx</span> <span class="p">-&gt;</span> <span class="k">if</span> <span class="n">idx</span> <span class="p">&lt;</span> <span class="n">min_idx</span> <span class="k">then</span> <span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">digit</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="n">min_idx</span><span class="p">,</span> <span class="n">acc_digit</span><span class="p">)</span>
+    <span class="p">|</span> <span class="nc">None</span> <span class="p">-&gt;</span> <span class="p">(</span><span class="n">min_idx</span><span class="p">,</span> <span class="n">acc_digit</span><span class="p">)</span>
+  <span class="k">in</span>
+  <span class="k">let</span> <span class="n">min_idx</span><span class="p">,</span> <span class="n">acc_digit</span> <span class="p">=</span>
+    <span class="nn">List</span><span class="p">.</span><span class="n">fold</span> <span class="n">digits_to_words</span> <span class="p">~</span><span class="n">init</span><span class="o">:(</span><span class="nn">Int</span><span class="p">.</span><span class="n">max_value</span><span class="p">,</span> <span class="nn">Int</span><span class="p">.</span><span class="n">max_value</span><span class="p">)</span> <span class="p">~</span><span class="n">f</span><span class="p">:</span><span class="n">find_word</span>
+  <span class="k">in</span>
+  <span class="k">if</span> <span class="n">min_idx</span> <span class="p">=</span> <span class="nn">Int</span><span class="p">.</span><span class="n">max_value</span> <span class="k">then</span> <span class="nc">None</span> <span class="k">else</span> <span class="nc">Some</span> <span class="p">(</span><span class="n">min_idx</span><span class="p">,</span> <span class="n">acc_digit</span><span class="p">)</span>
+
+<span class="k">let</span> <span class="n">find_first_word_left</span> <span class="n">line</span> <span class="p">=</span> <span class="n">find_first_word</span> <span class="n">line</span> <span class="n">digits_to_words</span>
+
+<span class="c">(* When we look for the first word from the right, we have to reverse the line
+   and the letters of the spelled out numbers we are checking for. *)</span>
+<span class="k">let</span> <span class="n">find_first_word_right</span> <span class="n">line</span> <span class="p">=</span>
+  <span class="n">find_first_word</span> <span class="p">(</span><span class="nn">String</span><span class="p">.</span><span class="n">rev</span> <span class="n">line</span><span class="p">)</span>
+    <span class="p">(</span><span class="nn">List</span><span class="p">.</span><span class="n">map</span> <span class="n">digits_to_words</span> <span class="p">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="p">(</span><span class="n">digit</span><span class="p">,</span> <span class="n">word</span><span class="p">)</span> <span class="p">-&gt;</span> <span class="p">(</span><span class="n">digit</span><span class="p">,</span> <span class="nn">String</span><span class="p">.</span><span class="n">rev</span> <span class="n">word</span><span class="o">)))</span>
+
+<span class="c">(* Find the first digit in the line from the left. Return the index of the digit
+   as well as its integer value. *)</span>
+<span class="k">let</span> <span class="n">find_first_digit_left</span> <span class="n">line</span> <span class="p">=</span>
+  <span class="k">match</span> <span class="nn">String</span><span class="p">.</span><span class="n">findi</span> <span class="n">line</span> <span class="p">~</span><span class="n">f</span><span class="o">:(</span><span class="k">fun</span> <span class="p">_</span> <span class="n">c</span> <span class="p">-&gt;</span> <span class="nn">Char</span><span class="p">.</span><span class="n">is_digit</span> <span class="n">c</span><span class="p">)</span> <span class="k">with</span>
+  <span class="p">|</span> <span class="nc">Some</span> <span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">first_digit</span><span class="p">)</span> <span class="p">-&gt;</span> <span class="nc">Some</span> <span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">char_to_int</span> <span class="n">first_digit</span><span class="p">)</span>
+  <span class="p">|</span> <span class="nc">None</span> <span class="p">-&gt;</span> <span class="nc">None</span>
+
+<span class="c">(* To get the first digit from the right we simply reverse the input line and
+   then get the first digit from the left. *)</span>
+<span class="k">let</span> <span class="n">find_first_digit_right</span> <span class="n">line</span> <span class="p">=</span> <span class="n">find_first_digit_left</span> <span class="p">(</span><span class="nn">String</span><span class="p">.</span><span class="n">rev</span> <span class="n">line</span><span class="p">)</span>
+
+<span class="c">(* Try to find the first word and the first digit in the string. Pick the one
+   with the lowest index and return the value. If none are found, return None. *)</span>
+<span class="k">let</span> <span class="n">find_first_num</span> <span class="n">line</span> <span class="p">~</span><span class="n">f1</span> <span class="p">~</span><span class="n">f2</span> <span class="p">=</span>
+  <span class="k">match</span> <span class="p">(</span><span class="n">f1</span> <span class="n">line</span><span class="p">,</span> <span class="n">f2</span> <span class="n">line</span><span class="p">)</span> <span class="k">with</span>
+  <span class="p">|</span> <span class="nc">Some</span> <span class="p">(</span><span class="n">idx1</span><span class="p">,</span> <span class="n">digit1</span><span class="o">),</span> <span class="nc">Some</span> <span class="p">(</span><span class="n">idx2</span><span class="p">,</span> <span class="n">digit2</span><span class="p">)</span> <span class="p">-&gt;</span>
+      <span class="k">if</span> <span class="n">idx1</span> <span class="p">&lt;</span> <span class="n">idx2</span> <span class="k">then</span> <span class="nc">Some</span> <span class="n">digit1</span> <span class="k">else</span> <span class="nc">Some</span> <span class="n">digit2</span>
+  <span class="p">|</span> <span class="nc">Some</span> <span class="o">(_,</span> <span class="n">digit1</span><span class="o">),</span> <span class="nc">None</span> <span class="p">-&gt;</span> <span class="nc">Some</span> <span class="n">digit1</span>
+  <span class="p">|</span> <span class="nc">None</span><span class="p">,</span> <span class="nc">Some</span> <span class="o">(_,</span> <span class="n">digit2</span><span class="p">)</span> <span class="p">-&gt;</span> <span class="nc">Some</span> <span class="n">digit2</span>
+  <span class="p">|</span> <span class="nc">None</span><span class="p">,</span> <span class="nc">None</span> <span class="p">-&gt;</span> <span class="nc">None</span>
+
+<span class="k">let</span> <span class="n">find_first_num_left</span> <span class="p">=</span>
+  <span class="n">find_first_num</span> <span class="p">~</span><span class="n">f1</span><span class="p">:</span><span class="n">find_first_word_left</span> <span class="p">~</span><span class="n">f2</span><span class="p">:</span><span class="n">find_first_digit_left</span>
+
+<span class="k">let</span> <span class="n">find_first_num_right</span> <span class="p">=</span>
+  <span class="n">find_first_num</span> <span class="p">~</span><span class="n">f1</span><span class="p">:</span><span class="n">find_first_word_right</span> <span class="p">~</span><span class="n">f2</span><span class="p">:</span><span class="n">find_first_digit_right</span>
+
+<span class="k">let</span> <span class="n">num_from_line</span> <span class="n">line</span> <span class="p">=</span>
+  <span class="k">match</span> <span class="p">(</span><span class="n">find_first_num_left</span> <span class="n">line</span><span class="p">,</span> <span class="n">find_first_num_right</span> <span class="n">line</span><span class="p">)</span> <span class="k">with</span>
+  <span class="p">|</span> <span class="nc">Some</span> <span class="n">left</span><span class="p">,</span> <span class="nc">Some</span> <span class="n">right</span> <span class="p">-&gt;</span> <span class="p">(</span><span class="n">left</span> <span class="p">*</span> <span class="mi">10</span><span class="p">)</span> <span class="o">+</span> <span class="n">right</span>
+  <span class="p">|</span> <span class="p">_</span> <span class="p">-&gt;</span> <span class="k">raise</span> <span class="p">(</span><span class="nc">Failure</span> <span class="s2">"Couldn't find a digit in the string"</span><span class="p">)</span>
+
+<span class="k">let</span> <span class="n">sum_lines</span> <span class="n">lines</span> <span class="p">=</span>
+  <span class="k">let</span> <span class="n">sum_nums</span> <span class="n">acc</span> <span class="n">line</span> <span class="p">=</span> <span class="n">acc</span> <span class="o">+</span> <span class="n">num_from_line</span> <span class="n">line</span> <span class="k">in</span>
+  <span class="nn">List</span><span class="p">.</span><span class="n">fold</span> <span class="n">lines</span> <span class="p">~</span><span class="n">init</span><span class="p">:</span><span class="mi">0</span> <span class="p">~</span><span class="n">f</span><span class="p">:</span><span class="n">sum_nums</span>
+
+<span class="k">let</span> <span class="bp">()</span> <span class="p">=</span>
+  <span class="k">let</span> <span class="n">lines</span> <span class="p">=</span> <span class="nn">In_channel</span><span class="p">.</span><span class="n">read_lines</span> <span class="s2">"inputs/day_01.txt"</span> <span class="k">in</span>
+  <span class="k">let</span> <span class="n">answer</span> <span class="p">=</span> <span class="n">sum_lines</span> <span class="n">lines</span> <span class="k">in</span>
+  <span class="nn">Printf</span><span class="p">.</span><span class="n">printf</span> <span class="s2">"Answer for part 2: %d</span><span class="se">\n</span><span class="s2">"</span> <span class="n">answer</span>
+</code></pre>
+</div>
+
+<p>Compiling and running this code yields the following result:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>Answer for part 2: 281
+</code></pre>
+</div>
+
+<h3 id="just-a-note">Just a note</h3>
+
+<p>Thanks for reading this post on solving the first day of Advent of Code 2023 using OCaml. I am going to experiment this year with writing a lot more blog posts that are shorter-form while timeboxing how much time I spend writing them. I have a habit of spending hours faffing over small details that gets in the way of producing more useful content.</p>
+
+<p>I am working on a lot of cool things in my free time including building a quantitative research platform on my home infrastructure. I am on a journey to learn the functional programming paradigm and absorb that into how I write software. I am also reading some books on quantitative finance and statistics. I have forgotten so much of the mathematics and statistics I learned as a university student and it has been a lot of fun getting back into it.</p>
+
+<p>Bookmark this blog and check back in on occasion if you feel like reading some (hopefully) interesting things about what I’ve been working on.</p>
+
+      </article>
+
+      
+
+      
+
+      <ul class="pager blog-pager">
+        
+        <li class="previous">
+          <a href="/2023-01-02-configuration-languages-a-balance-of-constraints" data-toggle="tooltip" data-placement="top" title="Configuration Languages: A Balance of Constraints">&larr; Previous Post</a>
+        </li>
+        
+        
+      </ul>
+
+      
+        <div class="disqus-comments">
+          
+
+        </div>
+      
+    </div>
+  </div>
+</div>
+
+    <footer>
+  <div class="container beautiful-jekyll-footer">
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+          
+          <li>
+            <a href="https://github.com/sebcoetzee" title="GitHub">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+		  
+	  
+      
+		  
+          <li>
+            <a href="mailto:seb.coetzee@gmail.com" title="Email me">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+		  
+          <li>
+            <a href="https://linkedin.com/in/in/sebastiancoetzee" title="LinkedIn">
+              <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+              </span>
+            </a>
+          </li>
+          
+		  
+		  
+      
+      
+      
+      
+		  
+        </ul>
+        <p class="copyright text-muted">
+		  Sebastian Coetzee
+		  &nbsp;&bull;&nbsp;
+		  2024
+
+		  
+		  &nbsp;&bull;&nbsp;
+		  <a href="https://sebastiancoetzee.com">sebastiancoetzee.com</a>
+		  
+	    </p>
+	        <!-- Please don't remove this, keep my open source work credited :) -->
+		<p class="theme-by text-muted">
+		  Theme by
+		  <a href="http://deanattali.com/beautiful-jekyll/">beautiful-jekyll</a>
+		</p>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  
+    
+
+
+
+
+
+
+  
+    <!-- doing something a bit funky here because I want to be careful not to include JQuery twice! -->
+    
+      <script>
+      	if (typeof jQuery == 'undefined') {
+      	  document.write('<script src="/js/jquery-1.11.2.min.js"></scr' + 'ipt>');
+      	}
+      </script>
+    
+  
+    <!-- doing something a bit funky here because I want to be careful not to include JQuery twice! -->
+    
+	<script src="/js/bootstrap.min.js"></script>
+    
+  
+    <!-- doing something a bit funky here because I want to be careful not to include JQuery twice! -->
+    
+	<script src="/js/main.js"></script>
+    
+  
+
+
+
+	<!-- Google Analytics -->
+	<script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+		ga('create', 'UA-28366174-2', 'auto');
+		ga('send', 'pageview');
+	</script>
+	<!-- End Google Analytics -->
+
+
+  
+  </body>
+</html>

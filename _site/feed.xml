@@ -2,9 +2,20 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Sebastian Coetzee</title>
-    <description>Software Engineer living in London.</description>
+    <description>Software Developer living in London</description>
     <link>https://sebastiancoetzee.com</link>
     <atom:link href="https://sebastiancoetzee.com/feed.xml" rel="self" type="application/rss+xml" />
+    
+      <item>
+        <title>Advent of Code 2023 in OCaml - Day 1</title>
+        <description>
+          
+          A good way to learn a new programming language is to jump in and solve some practice exercises. At the end of each year Advent of Code release a new coding exercise each day until Christmas. It has become fairly popular over the years. I have had an interest in...
+        </description>
+        <pubDate>Sat, 16 Mar 2024 00:00:00 +0000</pubDate>
+        <link>https://sebastiancoetzee.com/2024-03-16-advent-of-code-ocaml-2023-day-1</link>
+        <guid isPermaLink="true">https://sebastiancoetzee.com/2024-03-16-advent-of-code-ocaml-2023-day-1</guid>
+      </item>
     
       <item>
         <title>Configuration Languages: A Balance of Constraints</title>
@@ -12,7 +23,7 @@
           
           Configuration is a topic that is often debated among software teams. It’s one of those issues that every engineer has an (often strong) opinion about and there isn’t a definitive right or wrong answer. Even something as basic as the method for passing config to an application can be tough...
         </description>
-        <pubDate>Mon, 02 Jan 2023 00:00:00 +0200</pubDate>
+        <pubDate>Mon, 02 Jan 2023 00:00:00 +0000</pubDate>
         <link>https://sebastiancoetzee.com/2023-01-02-configuration-languages-a-balance-of-constraints</link>
         <guid isPermaLink="true">https://sebastiancoetzee.com/2023-01-02-configuration-languages-a-balance-of-constraints</guid>
       </item>
@@ -23,7 +34,7 @@
           
           As software engineers, we need to have confidence that the solutions we put into production are of the highest quality. This not only allows us to sleep better at night, but it’s important for the business to have faith in the quality of the product. One of the most effective...
         </description>
-        <pubDate>Mon, 01 Apr 2019 00:00:00 +0200</pubDate>
+        <pubDate>Mon, 01 Apr 2019 00:00:00 +0100</pubDate>
         <link>https://sebastiancoetzee.com/2019-04-01-testing-go-web-services-with-interfaces-and-mocks</link>
         <guid isPermaLink="true">https://sebastiancoetzee.com/2019-04-01-testing-go-web-services-with-interfaces-and-mocks</guid>
       </item>
@@ -34,7 +45,7 @@
           
           Starting out with a software project, authentication is usually quite a simple problem to solve. You simply create a users table in the database, collect users’ usernames and passwords (hashed and salted), and authenticate users against it. Just about every framework has a built-in way of doing authentication that can...
         </description>
-        <pubDate>Sun, 15 Oct 2017 00:00:00 +0200</pubDate>
+        <pubDate>Sun, 15 Oct 2017 00:00:00 +0100</pubDate>
         <link>https://sebastiancoetzee.com/2017-10-15-json-web-token-authentication-rails</link>
         <guid isPermaLink="true">https://sebastiancoetzee.com/2017-10-15-json-web-token-authentication-rails</guid>
       </item>
@@ -45,7 +56,7 @@
           
           I’m a software developer. My existence depends upon being connected to the net. I, like many other software developers, enjoy taking my laptop to the coffee shop, drinking coffee while reading up on the latest Hacker News articles or reading up on new programming languages. In order to do this,...
         </description>
-        <pubDate>Sun, 13 Nov 2016 00:00:00 +0200</pubDate>
+        <pubDate>Sun, 13 Nov 2016 00:00:00 +0000</pubDate>
         <link>https://sebastiancoetzee.com/2016-11-13-best-wifi-in-cape-town-coffee-shops</link>
         <guid isPermaLink="true">https://sebastiancoetzee.com/2016-11-13-best-wifi-in-cape-town-coffee-shops</guid>
       </item>
@@ -56,7 +67,7 @@
           
           The Backstory I am busy building a SaaS product that has to reliably send large numbers of emails. At ZappiStore we use the Ruby on Rails stack extensively. I think Rails is an excellent choice for building web applications. Rails makes you super productive and the community support is excellent....
         </description>
-        <pubDate>Sun, 12 Jun 2016 00:00:00 +0200</pubDate>
+        <pubDate>Sun, 12 Jun 2016 00:00:00 +0100</pubDate>
         <link>https://sebastiancoetzee.com/2016-06-12-rabbitmq-as-a-message-broker-for-ruby</link>
         <guid isPermaLink="true">https://sebastiancoetzee.com/2016-06-12-rabbitmq-as-a-message-broker-for-ruby</guid>
       </item>
@@ -67,7 +78,7 @@
           
           A large portion of the software engineering world has moved away from large monolithic software designs. Instead of having tightly-coupled systems, the modern trend in software is to create multiple smaller, independent microservices. This allows different microservices to be responsible for different functionality in the greater system. The only thing...
         </description>
-        <pubDate>Wed, 02 Mar 2016 00:00:00 +0200</pubDate>
+        <pubDate>Wed, 02 Mar 2016 00:00:00 +0000</pubDate>
         <link>https://sebastiancoetzee.com/2016-03-02-continuous-deployment-of-java-microservices-using-teamcity</link>
         <guid isPermaLink="true">https://sebastiancoetzee.com/2016-03-02-continuous-deployment-of-java-microservices-using-teamcity</guid>
       </item>
@@ -78,7 +89,7 @@
           
           Currently, my preferred technology stack on the front-end is using React for the views and Backbone to give the app its structure (router, event bus, models, collections etc.). Using React gives you all the goodness of components that manage their own state and the amazing performance of the virtual DOM....
         </description>
-        <pubDate>Tue, 05 Jan 2016 00:00:00 +0200</pubDate>
+        <pubDate>Tue, 05 Jan 2016 00:00:00 +0000</pubDate>
         <link>https://sebastiancoetzee.com/2016-01-05-decoupled-modals-with-react-and-backbone</link>
         <guid isPermaLink="true">https://sebastiancoetzee.com/2016-01-05-decoupled-modals-with-react-and-backbone</guid>
       </item>
@@ -89,7 +100,7 @@
           
           The modern software engineer faces a set of problems that did not exist 15 years ago. Looking at the advancement of processing power in recent years signals the end of Moore’s Law. The clock speeds of modern processors seem to be plateauing and the only way to make things go...
         </description>
-        <pubDate>Fri, 25 Dec 2015 00:00:00 +0200</pubDate>
+        <pubDate>Fri, 25 Dec 2015 00:00:00 +0000</pubDate>
         <link>https://sebastiancoetzee.com/2015-12-25-functional-java-for-parallel-processing</link>
         <guid isPermaLink="true">https://sebastiancoetzee.com/2015-12-25-functional-java-for-parallel-processing</guid>
       </item>
@@ -100,7 +111,7 @@
           
           So, my old blog was getting a little dated. It was a WordPress blog and with the recent craze around static sites I decided to switch over to Jekyll. The idea with this blog is for me to have a place to share things that are related to my work...
         </description>
-        <pubDate>Sun, 13 Dec 2015 00:00:00 +0200</pubDate>
+        <pubDate>Sun, 13 Dec 2015 00:00:00 +0000</pubDate>
         <link>https://sebastiancoetzee.com/2015-12-13-new-blog</link>
         <guid isPermaLink="true">https://sebastiancoetzee.com/2015-12-13-new-blog</guid>
       </item>
