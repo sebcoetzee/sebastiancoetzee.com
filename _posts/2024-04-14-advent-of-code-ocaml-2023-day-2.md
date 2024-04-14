@@ -3,6 +3,8 @@ layout: post
 title: Advent of Code 2023 in OCaml - Day 2
 ---
 
+![OCaml logo](../img/posts/ocaml.png){: width="100%" }
+
 This is the second in the series of [Advent of Code 2023](https://adventofcode.com/2023) in [OCaml](https://ocaml.org/). If you're interested, take a look at [Day 1](/2024-03-16-advent-of-code-ocaml-2023-day-1). Let's jump straight in.
 
 **Note:** I will be using Jane Street's [core](https://ocaml.org/p/core/latest) library as a replacement for OCaml's standard library.
