@@ -3,6 +3,8 @@ layout: post
 title: Advent of Code 2023 in OCaml - Day 1
 ---
 
+![OCaml logo](../img/posts/ocaml.png){: width="100%" }
+
 A good way to learn a new programming language is to jump in and solve some practice exercises. At the end of each year Advent of Code release a new coding exercise each day until Christmas. It has become fairly popular over the years.
 
 I have had an interest in the functional paradigm for a while, so this year I decided to complete the [Advent of Code 2023](https://adventofcode.com/2023) exercises in [OCaml](https://ocaml.org/). So, let's jump straight into the first day's exercise.
